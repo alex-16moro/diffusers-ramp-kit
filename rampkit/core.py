@@ -165,10 +165,37 @@ def context(repo: Path, relative: str, symbol: str | None = None) -> dict:
     }
 
 
+def require_pinned_base(repo: Path, base: str):
+    """Explain a checkout that is not built on the profile's pinned commit."""
+    guidance = (
+        "Clone the fork's ramp-base branch with full history (not --depth 1), "
+        "or ask the platform owner to re-pin the profile. Do not attach the kit to newer main "
+        "or to a branch carrying an earlier overlay."
+    )
+    present = subprocess.run(
+        ["git", "-C", str(repo), "cat-file", "-e", f"{base}^{{commit}}"], capture_output=True
+    )
+    if present.returncode:
+        raise RampError(f"WRONG_BASE: pinned commit {base[:12]} is not present in this checkout. {guidance}")
+    result = subprocess.run(
+        ["git", "-C", str(repo), "merge-base", "--is-ancestor", base, "HEAD"], capture_output=True
+    )
+    if result.returncode == 1:
+        fork_point = git(repo, "merge-base", base, "HEAD").decode().strip()
+        shared = f"it shares history only up to {fork_point[:12]}" if fork_point else "it shares no history"
+        raise RampError(
+            f"WRONG_BASE: this checkout is not built on pinned commit {base[:12]} ({shared}). {guidance}"
+        )
+    if result.returncode:
+        raise RampError(
+            f"git merge-base --is-ancestor failed: {result.stderr.decode(errors='replace').strip()}"
+        )
+
+
 def doctor(repo: Path, dependencies: bool = True) -> dict:
     prof = profile()
     failures = []
-    git(repo, "merge-base", "--is-ancestor", prof["base_sha"], "HEAD")
+    require_pinned_base(repo, prof["base_sha"])
     for relative in prof["editable_files"]:
         if relative not in prof["sources"]:
             failures.append(f"Edit path has no approved source: {relative}")

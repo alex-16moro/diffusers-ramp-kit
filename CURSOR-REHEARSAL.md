@@ -41,4 +41,6 @@ Record the fallback-to-default variant as a labelled generalisation run. After t
 
 ## Fork CI evidence
 
+Installation published: `alex-16moro/diffusers` branch `ramp-base` at `961cf0f63de7995bf0d72f99f2517afb4ed40ed2`, one commit on upstream pin `0121a91f9d419ff7234c8a5923f82c244e6f1914`. It carries kit digest `f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d` (kit revision `151e8b3`), created with `onboard`. A fresh `git clone --single-branch --branch ramp-base` tracked all 21 manifest paths and `doctor` returned PASS. No task records, completed contributions or earlier overlay files are on that branch. Branch protection and the required status check are repository settings and are not yet recorded as configured.
+
 Pending: real PR against pinned `ramp-base`, Actions URL and conclusion, exact base/head SHAs, local patch digest and matching CI patch digest for the identical submitted patch (not a required match to a differently worded packaged fixture). Kit-repository CI and local simulations do not satisfy this gate.

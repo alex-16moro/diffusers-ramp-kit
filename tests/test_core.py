@@ -232,6 +232,29 @@ class WorkflowTests(unittest.TestCase):
         with self.assertRaises(core.RampError):
             attach(self.repo)
 
+    def test_checkout_not_built_on_pin_is_explained(self):
+        commit = ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm"]
+        self.git("switch", "-q", "-c", "newer-main")
+        (self.repo / "overlay.txt").write_text("other kit\n")
+        self.git("add", "overlay.txt")
+        self.git(*commit, "overlay")
+        self.profile["base_sha"] = self.git("rev-parse", "HEAD").strip()
+        self.git("switch", "-q", "-")
+        with self.assertRaisesRegex(core.RampError, r"WRONG_BASE: .*shares history only up to .*ramp-base"):
+            core.doctor(self.repo, dependencies=False)
+        self.profile["base_sha"] = "0" * 40
+        with self.assertRaisesRegex(core.RampError, r"WRONG_BASE: pinned commit 000000000000 is not present"):
+            core.doctor(self.repo, dependencies=False)
+
+    def test_attach_names_every_conflict_from_another_installation(self):
+        (self.repo / ".cursorignore").write_text("other kit\n")
+        (self.repo / ".cursor/rules").mkdir(parents=True)
+        (self.repo / ".cursor/rules/ramp-entry.mdc").write_text("other kit\n")
+        with self.assertRaisesRegex(core.RampError, r"ATTACH_CONFLICT: .*ramp-entry\.mdc.*\.cursorignore"):
+            attach(self.repo)
+        self.assertFalse((self.repo / ".ramp-kit").exists())
+        self.assertEqual((self.repo / ".cursorignore").read_text(), "other kit\n")
+
     def test_fresh_onboarding_excludes_solution_and_credentials(self):
         (self.repo / ".env").write_text("HARMLESS_SENTINEL=not-a-secret\n")
         (self.repo / "completed.patch").write_text("untracked solution sentinel")
