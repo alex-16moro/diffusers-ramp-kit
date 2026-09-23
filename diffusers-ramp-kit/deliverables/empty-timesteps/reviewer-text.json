@@ -1,0 +1,48 @@
+{
+  "approval": "NOT_RUN",
+  "patch_sha256": "5380733056ba1589e9cfebe911013967d661c8c25102c4443833847587462995",
+  "entries": [
+    {
+      "path": "src/diffusers/schedulers/scheduling_ddpm.py",
+      "line": 300,
+      "kind": "string literal (including errors and test text)",
+      "text": "`timesteps` cannot be empty."
+    },
+    {
+      "path": "src/diffusers/schedulers/scheduling_ddpm_parallel.py",
+      "line": 315,
+      "kind": "string literal (including errors and test text)",
+      "text": "`timesteps` cannot be empty."
+    },
+    {
+      "path": "tests/schedulers/test_scheduler_ddpm.py",
+      "line": 162,
+      "kind": "string literal (including errors and test text)",
+      "text": "timesteps.*empty"
+    },
+    {
+      "path": "tests/schedulers/test_scheduler_ddpm.py",
+      "line": 164,
+      "kind": "string literal (including errors and test text)",
+      "text": "Can only pass one"
+    },
+    {
+      "path": "tests/schedulers/test_scheduler_ddpm.py",
+      "line": 171,
+      "kind": "string literal (including errors and test text)",
+      "text": "cpu"
+    },
+    {
+      "path": "tests/schedulers/test_scheduler_ddpm.py",
+      "line": 173,
+      "kind": "string literal (including errors and test text)",
+      "text": "cpu"
+    },
+    {
+      "path": "tests/schedulers/test_scheduler_ddpm.py",
+      "line": 179,
+      "kind": "string literal (including errors and test text)",
+      "text": "cpu"
+    }
+  ]
+}

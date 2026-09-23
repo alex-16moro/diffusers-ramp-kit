@@ -1,0 +1,257 @@
+[
+  {
+    "name": "cold-bootstrap",
+    "command": [
+      "bash",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/runtime/bootstrap.sh",
+      "/workspace/scratch/306c018f6a72/review-integration-final"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "doctor",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "doctor"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "stage-installation",
+    "command": [
+      "git",
+      "add",
+      "-A"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "commit-installation",
+    "command": [
+      "git",
+      "-c",
+      "user.name=Ramp Kit verification",
+      "-c",
+      "user.email=verification@example.invalid",
+      "commit",
+      "-qm",
+      "Install reviewed kit for disposable integration test"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "tracked-installation",
+    "command": [
+      "git",
+      "ls-files"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "clone-installation",
+    "command": [
+      "git",
+      "clone",
+      "--no-hardlinks",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/review-integration-final-policy"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "fresh-clone-doctor",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final-policy/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final-policy",
+      "doctor"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "prepare",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "prepare",
+      "--spec",
+      "/workspace/scratch/306c018f6a72/ramp-kit-review/diffusers-ramp-kit/examples/empty-timesteps.json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "assess",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "assess",
+      "empty-timesteps",
+      "--decision",
+      "COMPATIBLE",
+      "--rationale",
+      "Reject an explicitly empty custom schedule with a clear error at its owning API; preserve valid input and mutual-exclusion precedence.",
+      "--source",
+      ".ai/references/code_style.md",
+      "--source",
+      "docs/source/en/conceptual/philosophy.md",
+      "--source",
+      "src/diffusers/schedulers/scheduling_ddpm.py"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "apply-test-fixture",
+    "command": [
+      "git",
+      "apply",
+      "--include=tests/schedulers/test_scheduler_ddpm.py",
+      "/workspace/scratch/306c018f6a72/ramp-kit-review/diffusers-ramp-kit/tests/fixtures/contribution.patch"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "baseline",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "verify",
+      "empty-timesteps",
+      "--phase",
+      "baseline"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "apply-implementation-fixture",
+    "command": [
+      "git",
+      "apply",
+      "--exclude=tests/schedulers/test_scheduler_ddpm.py",
+      "/workspace/scratch/306c018f6a72/ramp-kit-review/diffusers-ramp-kit/tests/fixtures/contribution.patch"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "local-full",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "verify",
+      "empty-timesteps",
+      "--level",
+      "full"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "local-report",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "report",
+      "empty-timesteps"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "stage-candidate",
+    "command": [
+      "git",
+      "add",
+      "src/diffusers/schedulers/scheduling_ddpm.py",
+      "src/diffusers/schedulers/scheduling_ddpm_parallel.py",
+      "tests/schedulers/test_scheduler_ddpm.py",
+      ".ramp/empty-timesteps/task.json",
+      ".ramp/empty-timesteps/architecture.json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "commit-candidate",
+    "command": [
+      "git",
+      "-c",
+      "user.name=Ramp Kit verification",
+      "-c",
+      "user.email=verification@example.invalid",
+      "commit",
+      "-qm",
+      "Apply labelled fixture for disposable CI simulation"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "clone-candidate",
+    "command": [
+      "git",
+      "clone",
+      "--no-hardlinks",
+      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/review-integration-final-candidate"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "different-git-abbreviation",
+    "command": [
+      "git",
+      "config",
+      "core.abbrev",
+      "12"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "protected-build-inputs",
+    "command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "85bf2248a00677e80605a133558d6ee48d89819d",
+      "--",
+      "setup.py",
+      "pyproject.toml"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "simulated-ci-full",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final-policy/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final-candidate",
+      "verify",
+      "empty-timesteps",
+      "--level",
+      "full"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "simulated-ci-report",
+    "command": [
+      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/review-integration-final-policy/.ramp-kit/run.py",
+      "--repo",
+      "/workspace/scratch/306c018f6a72/review-integration-final-candidate",
+      "report",
+      "empty-timesteps"
+    ],
+    "exit_code": 0
+  }
+]

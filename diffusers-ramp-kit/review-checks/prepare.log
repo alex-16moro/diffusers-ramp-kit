@@ -1,0 +1,6 @@
+{
+  "status": "PREPARED",
+  "task": "/workspace/scratch/306c018f6a72/review-integration-final/.ramp/empty-timesteps/task.json",
+  "next_action": "Read approved sources, assess architectural fit, record the assessment before coding.",
+  "scaffold": "/workspace/scratch/306c018f6a72/review-integration-final/.ramp/empty-timesteps/test-scaffold.txt"
+}

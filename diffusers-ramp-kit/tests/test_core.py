@@ -1,3 +1,6 @@
+import contextlib
+import copy
+import io
 import subprocess
 import tempfile
 import unittest
@@ -5,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from rampkit import core
-from rampkit.cli import attach, onboard
+from rampkit.cli import attach, main, onboard
 from rampkit.report import render
 
 
@@ -264,6 +267,146 @@ class WorkflowTests(unittest.TestCase):
                 self.repo, self.directory / "logs", "acceptance", [self.task["regression_test"]]
             )
         self.assertEqual(result["status"], "ERROR")
+
+    def test_normal_commit_and_clone_preserves_entire_attachment(self):
+        (self.repo / ".gitignore").write_text(".cursor\n*.lock\n")
+        result = attach(self.repo)
+        self.assertEqual(result["status"], "ATTACHED")
+        self.git("add", "-A")
+        self.git(
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "-qm",
+            "Attach kit",
+        )
+        tracked = set(self.git("ls-files").splitlines())
+        manifest = core.attachment(self.repo)
+        self.assertTrue(set(manifest["files"]) <= tracked)
+        self.assertIn(".ramp-kit/runtime/requirements.txt", tracked)
+        with tempfile.TemporaryDirectory() as tmp:
+            clone = Path(tmp) / "clone"
+            subprocess.run(["git", "clone", "-q", str(self.repo), str(clone)], check=True)
+            self.assertEqual(core.doctor(clone, dependencies=False)["status"], "PASS")
+            (clone / ".cursor/private-settings.json").write_text("{}")
+            self.assertNotIn(".cursor/private-settings.json", core.changed(clone, self.sha))
+
+    def test_scaffold_uses_task_mappings_and_deduplicates(self):
+        task = copy.deepcopy(self.task)
+        task["criteria"].append(
+            {"id": "AC2", "text": "Second", "tests": [self.tests + "::OtherTests::test_second"]}
+        )
+        scaffold = core.test_scaffold(task)
+        self.assertIn("class OtherTests:", scaffold)
+        self.assertIn("def test_second(self):", scaffold)
+        self.assertNotIn("DDPM", scaffold)
+        self.assertIn("NotImplementedError", scaffold)
+
+    def test_empty_and_raise_only_mapped_tests_are_rejected(self):
+        fixture = Path(__file__).parent / "fixtures/no_assertions.txt"
+        (self.repo / self.tests).write_text(fixture.read_text())
+        self.assertEqual(core.assertion_findings(self.repo, self.task)[0]["rule"], "TEST-ASSERTIONS")
+        for body in ["raise ValueError('not an assertion')", "def helper():\n            assert True"]:
+            (self.repo / self.tests).write_text(
+                "class Tests:\n    def test_empty(self):\n        " + body + "\n"
+            )
+            self.assertTrue(core.assertion_findings(self.repo, self.task))
+
+    def test_supported_assertion_patterns(self):
+        for body in [
+            "assert answer == 1",
+            "self.assertEqual(answer, 1)",
+            "with self.assertRaises(ValueError):\n            operation()",
+            "with pytest.raises(ValueError):\n            operation()",
+        ]:
+            (self.repo / self.tests).write_text(
+                "class Tests:\n    def test_empty(self):\n        " + body + "\n"
+            )
+            self.assertEqual(core.assertion_findings(self.repo, self.task), [])
+
+    def test_assertion_free_candidate_cannot_reach_ready(self):
+        (self.repo / self.tests).write_text("class Tests:\n    def test_empty(self):\n        pass\n")
+        with (
+            patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+            patch.object(core, "pytest_check") as run,
+        ):
+            result = core.verify(self.repo, "task", "full", "candidate")
+        self.assertEqual(result["status"], "FAIL")
+        run.assert_not_called()
+        self.assertEqual(core.readiness(self.repo, self.task)["status"], "FAIL")
+
+    def test_patch_digest_ignores_git_display_configuration(self):
+        (self.repo / self.source).write_text("class Scheduler:\n    def step(self):\n        return 2\n")
+        before = core.patch_bytes(self.repo, self.task)
+        self.git("config", "core.abbrev", "12")
+        self.git("config", "diff.noprefix", "true")
+        self.git("config", "diff.context", "9")
+        self.git("config", "diff.algorithm", "histogram")
+        self.assertEqual(before, core.patch_bytes(self.repo, self.task))
+
+    def test_baseline_failure_reasons_and_exit_contract(self):
+        (self.repo / self.tests).write_text("class Tests:\n    def test_empty(self):\n        assert True\n")
+        cases = [
+            ("PASS", 0, "", "observed PASS", "FAIL"),
+            ("SKIPPED", 0, "", "observed SKIPPED", "FAIL"),
+            ("FAIL", 1, "AssertionError: wrong", "observed AssertionError, expected IndexError", "FAIL"),
+            ("ERROR", 2, "ImportError: missing", "REGRESSION_EXECUTION_ERROR", "ERROR"),
+        ]
+        for observed, exit_code, detail, reason, status in cases:
+            check = {
+                "id": "regression",
+                "status": observed,
+                "exit_code": exit_code,
+                "tests": [{"status": observed, "detail": detail}],
+            }
+            with (
+                patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+                patch.object(core, "pytest_check", return_value=check),
+            ):
+                result = core.verify(self.repo, "task", "fast", "baseline")
+            self.assertEqual(result["status"], status)
+            self.assertIn(reason, result["next_action"])
+        (self.directory / "architecture.json").unlink()
+        with (
+            patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            code = main(["--repo", str(self.repo), "verify", "task", "--phase", "baseline"])
+        self.assertEqual(code, 1)
+
+    def test_replay_does_not_overwrite_preimplementation_record(self):
+        (self.repo / self.tests).write_text("class Tests:\n    def test_empty(self):\n        assert True\n")
+        baseline = {"status": "EXPECTED_FAILURE", "origin": "pre-implementation sentinel"}
+        core.write(self.directory / "baseline.json", baseline)
+        result = {"id": "test-strength", "status": "PASS"}
+        with (
+            patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+            patch.object(core, "pytest_check", return_value={"id": "acceptance", "status": "PASS"}),
+            patch.object(core, "run_check", return_value={"id": "lint", "status": "PASS"}),
+            patch.object(core, "replay_regression", return_value=result),
+        ):
+            core.verify(self.repo, "task", "full", "candidate")
+        self.assertEqual(core.load(self.directory / "baseline.json"), baseline)
+        self.assertIn("replay", core.load(self.directory / "replay.json")["origin"])
+
+    def test_report_shows_policy_counts_and_exact_wording(self):
+        (self.repo / self.source).write_text(
+            'class Scheduler:\n    """Public scheduler."""\n    def step(self):\n        # Explain validation\n        raise ValueError("No steps")\n'
+        )
+        render(self.repo, "task")
+        report = (self.directory / "review.md").read_text()
+        pr = (self.directory / "PR-DRAFT.md").read_text()
+        self.assertIn("Required full checks: 5; executed in candidate: 0", report)
+        self.assertIn("Only fork CI enforces policy integrity.", report)
+        self.assertIn("Pre-implementation baseline: NOT_RUN", report)
+        self.assertIn("No steps", pr)
+        self.assertIn("Public scheduler.", pr)
+        self.assertIn("# Explain validation", pr)
+        self.assertIn("Proposed commit message", pr)
+        self.assertIn("Approval: NOT_RUN", pr)
+        self.assertIn("No steps", (self.directory / "review.html").read_text())
 
 
 if __name__ == "__main__":

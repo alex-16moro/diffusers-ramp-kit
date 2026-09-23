@@ -111,6 +111,8 @@ def validate_task(task: dict, prof: dict):
         raise RampError("Unsupported recipe. Extend and review the library profile before claiming coverage.")
     if not set(task["editable_files"]) <= set(prof["editable_files"]):
         raise RampError("Task edit scope exceeds the installed profile.")
+    if prof["test_file"] not in task["editable_files"]:
+        raise RampError("Task edit scope must include its mapped test file.")
     ids = set()
     all_tests = []
     for criterion in task["criteria"]:
@@ -121,7 +123,9 @@ def validate_task(task: dict, prof: dict):
         if not tests:
             raise RampError(f"Criterion {criterion['id']} has no test mapping.")
         for node in tests:
-            if not re.fullmatch(re.escape(prof["test_file"]) + r"::[A-Za-z0-9_]+::test_[A-Za-z0-9_]+", node):
+            if not re.fullmatch(
+                re.escape(prof["test_file"]) + r"::[A-Za-z_][A-Za-z0-9_]*::test_[A-Za-z0-9_]+", node
+            ):
                 raise RampError(f"Unsupported test ID: {node}")
         all_tests.extend(tests)
     if task["regression_test"] not in all_tests:
@@ -251,7 +255,7 @@ def prepare(repo: Path, spec: Path) -> dict:
         },
     )
     write(directory / "context-index.json", {"base_sha": prof["base_sha"], "sources": prof["sources"]})
-    (directory / "test-scaffold.txt").write_text((kit_root() / "templates/test-scaffold.txt").read_text())
+    (directory / "test-scaffold.txt").write_text(test_scaffold(task))
     return {
         "status": "PREPARED",
         "task": str(directory / "task.json"),
@@ -295,6 +299,127 @@ def attachment(repo: Path) -> dict:
     return load(path) if path.is_file() else {"files": {}}
 
 
+def test_scaffold(task: dict) -> str:
+    """Generate incomplete method stubs from the validated task, never a solution."""
+    groups = {}
+    for criterion in task["criteria"]:
+        for node in criterion["tests"]:
+            path, klass, method = node.split("::")
+            groups.setdefault((path, klass), {}).setdefault(method, []).append(criterion["id"])
+    lines = [
+        "# Merge these stubs into the existing classes; do not duplicate existing methods.",
+        "# Implement real assertions before baseline verification. Stubs deliberately fail.",
+    ]
+    for (path, klass), methods in groups.items():
+        lines += ["", f"# {path}", f"class {klass}:"]
+        for method, criteria in methods.items():
+            lines += [
+                f"    def {method}(self):",
+                f"        # Acceptance: {', '.join(criteria)}",
+                '        raise NotImplementedError("Write the mapped behavioural assertions")',
+                "",
+            ]
+    return "\n".join(lines) + "\n"
+
+
+def assertion_findings(repo: Path, task: dict) -> list[dict]:
+    """Small syntactic safeguard, not a proof of assertion quality or reachability."""
+    findings = []
+    for node_id in dict.fromkeys(t for c in task["criteria"] for t in c["tests"]):
+        path, klass, method = node_id.split("::")
+        try:
+            tree = ast.parse(safe_path(repo, path).read_text())
+        except (OSError, SyntaxError) as exc:
+            findings.append({"rule": "TEST-ASSERTIONS", "path": path, "message": str(exc)})
+            continue
+        classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == klass]
+        methods = [
+            n
+            for c in classes
+            for n in c.body
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == method
+        ]
+        if len(classes) != 1 or len(methods) != 1:
+            findings.append(
+                {
+                    "rule": "TEST-ASSERTIONS",
+                    "path": path,
+                    "message": f"Mapped method missing or duplicated: {node_id}",
+                }
+            )
+            continue
+
+        def has_assertion(node):
+            if isinstance(node, ast.Assert):
+                return True
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                owner = node.func.value
+                if isinstance(owner, ast.Name):
+                    if owner.id == "self" and node.func.attr.startswith("assert"):
+                        return True
+                    if owner.id == "pytest" and node.func.attr == "raises":
+                        return True
+            # Assertions in uncalled nested helpers/classes do not count.
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                return False
+            return any(has_assertion(child) for child in ast.iter_child_nodes(node))
+
+        if not any(has_assertion(n) for n in methods[0].body):
+            findings.append(
+                {
+                    "rule": "TEST-ASSERTIONS",
+                    "path": path,
+                    "line": methods[0].lineno,
+                    "message": f"{node_id} has no supported assertion. Add a behavioural assert, self.assert*, or pytest.raises.",
+                }
+            )
+    return findings
+
+
+def patch_bytes(repo: Path, task: dict) -> bytes:
+    # Keep patch identity independent of local Git display preferences and repo size.
+    return git(
+        repo,
+        "-c",
+        "core.quotePath=true",
+        "diff",
+        "--binary",
+        "--full-index",
+        "--no-color",
+        "--no-ext-diff",
+        "--no-textconv",
+        "--no-renames",
+        "--diff-algorithm=myers",
+        "--no-indent-heuristic",
+        "--unified=3",
+        "--src-prefix=a/",
+        "--dst-prefix=b/",
+        task["base_sha"],
+        "--",
+        *sorted(task["editable_files"]),
+    )
+
+
+def required_checks(level: str = "full", phase: str = "candidate") -> list[str]:
+    if phase == "baseline":
+        return ["regression"]
+    checks = ["acceptance", "scheduler-tests", "lint", "format"]
+    if level == "full":
+        checks += [c["id"] for c in profile()["upstream_checks"]] + ["test-strength"]
+    return checks
+
+
+def policy_provenance(repo: Path) -> dict:
+    installed = attachment(repo).get("kit_sha256", "UNAVAILABLE")
+    return {
+        "runner_kit_sha256": kit_hash(),
+        "released_kit_sha256": installed,
+        "reference_source": "attachment.json at installation; locally editable, not an independent trust anchor",
+        "full_required_checks": required_checks(),
+        "integrity_boundary": "Only fork CI enforces policy integrity.",
+    }
+
+
 def scope_findings(repo: Path, task: dict) -> list[dict]:
     managed = attachment(repo)["files"]
     findings = []
@@ -330,7 +455,8 @@ def fingerprint(repo: Path, task: dict) -> str:
             continue
         path = safe_path(repo, relative)
         contents.append((relative, digest(path.read_bytes()) if path.is_file() else "DELETED"))
-    review = load(task_dir(repo, task["id"]) / "architecture.json")
+    review_path = task_dir(repo, task["id"]) / "architecture.json"
+    review = load(review_path) if review_path.exists() else {}
     packages = sorted((d.metadata.get("Name", ""), d.version) for d in importlib.metadata.distributions())
     return digest(
         canonical(
@@ -496,6 +622,23 @@ def expected_regression(check: dict, task: dict) -> bool:
     )
 
 
+def regression_failure(check: dict, task: dict) -> str:
+    expected = task.get("baseline_error", "IndexError")
+    tests = check.get("tests", [])
+    if check.get("status") == "ERROR":
+        return "REGRESSION_EXECUTION_ERROR: inspect collection/import/runtime errors in the regression log."
+    if len(tests) != 1:
+        return f"REGRESSION_NOT_REPRODUCED: observed {len(tests)} tests, expected exactly one."
+    observed = tests[0]["status"]
+    if observed != "FAIL":
+        return f"REGRESSION_NOT_REPRODUCED: observed {observed}, expected {expected} from the original implementation."
+    detail = tests[0].get("detail", "")
+    exception = detail.split(":", 1)[0].splitlines()[0] if detail else "unknown failure"
+    if exception != expected:
+        return f"REGRESSION_WRONG_FAILURE: observed {exception}, expected {expected}."
+    return f"REGRESSION_WRONG_ORIGIN: {expected} must reach an approved implementation file; inspect the traceback."
+
+
 def isolated_check(repo: Path, task: dict, logs: Path, name: str, argv: list[str]) -> dict:
     """Keep upstream checks that rewrite generated data outside the working contribution."""
     with tempfile.TemporaryDirectory(prefix="ramp-check-") as tmp:
@@ -534,6 +677,7 @@ def replay_regression(repo: Path, task: dict, logs: Path) -> dict:
         result["log"] = str(log.relative_to(repo))
         result["working_directory"] = "Disposable pinned snapshot (removed after check)"
     observed = expected_regression(result, task)
+    reason = None if observed else regression_failure(result, task)
     result.update(
         id="test-strength",
         status="PASS" if observed else "ERROR" if result["status"] == "ERROR" else "FAIL",
@@ -544,6 +688,8 @@ def replay_regression(repo: Path, task: dict, logs: Path) -> dict:
             for p in profile()["implementation_files"]
         ),
     )
+    if reason:
+        result["error"] = reason
     if not result["implementation_changed"]:
         result["status"] = "FAIL"
         result["error"] = "No implementation change to remove; test-strength evidence is incomplete."
@@ -556,9 +702,9 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
     preflight = doctor(repo)
     if preflight["status"] != "PASS":
         raise RampError("; ".join(preflight["findings"]))
-    review = load(directory / "architecture.json")
-    findings = scope_findings(repo, task) + diagnostic(repo, task)
-    if review["decision"] != "COMPATIBLE" or review.get("task_sha256") != digest(canonical(task)):
+    review = load(directory / "architecture.json") if (directory / "architecture.json").exists() else {}
+    findings = scope_findings(repo, task) + diagnostic(repo, task) + assertion_findings(repo, task)
+    if review.get("decision") != "COMPATIBLE" or review.get("task_sha256") != digest(canonical(task)):
         findings.append(
             {"rule": "DESIGN", "message": "Current task needs a compatible, cited architecture assessment."}
         )
@@ -617,9 +763,9 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
         "fingerprint": before,
         "base_sha": task["base_sha"],
         "kit_sha256": kit_hash(),
-        "patch_sha256": digest(
-            git(repo, "diff", "--binary", task["base_sha"], "--", *task["editable_files"])
-        ),
+        "patch_sha256": digest(patch_bytes(repo, task)),
+        "policy": policy_provenance(repo),
+        "required_checks": required_checks(level, phase),
         "runtime": preflight["runtime"],
         "findings": findings,
         "checks": checks,
@@ -640,7 +786,20 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
     if phase == "baseline":
         intended = bool(not findings and checks and expected_regression(checks[0], task))
         result["intended_failure_observed"] = intended
-        result["status"] = "EXPECTED_FAILURE" if intended else "ERROR"
+        result["status"] = (
+            "EXPECTED_FAILURE"
+            if intended
+            else ("ERROR" if any(c["status"] == "ERROR" for c in checks) else "FAIL")
+        )
+        result["origin"] = "Pre-implementation run on the unchanged implementation"
+        if not intended:
+            result["reason"] = (
+                "; ".join(f["message"] for f in findings)
+                if findings
+                else regression_failure(checks[0], task)
+                if checks
+                else "Regression did not execute."
+            )
         result["test_sha256"] = digest(safe_path(repo, profile()["test_file"]).read_bytes())
         result["task_sha256"] = digest(canonical(task))
     elif level == "full":
@@ -648,9 +807,10 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
         if strength and strength["status"] == "PASS":
             # CI reruns this evidence using its own environment; it never trusts a submitted green result.
             write(
-                directory / "baseline.json",
+                directory / "replay.json",
                 {
                     "status": "EXPECTED_FAILURE",
+                    "run_id": run_id,
                     "intended_failure_observed": True,
                     "origin": "Disposable original-implementation replay during full verification",
                     "base_sha": task["base_sha"],
@@ -666,6 +826,10 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
         "ERROR": "Resolve the execution/configuration error shown in the checks, then rerun.",
         "INCOMPLETE": "Resolve required skipped or unavailable checks, then rerun.",
     }.get(result["status"], "Resolve findings and failed checks; rerun verification.")
+    if result.get("reason"):
+        result["next_action"] = result["reason"]
+    elif findings:
+        result["next_action"] = "; ".join(f["message"] for f in findings)
     write(logs / "result.json", result)
     write(directory / f"{phase}.json", result)
     return result
@@ -675,17 +839,25 @@ def readiness(repo: Path, task: dict) -> dict:
     directory = task_dir(repo, task["id"])
     candidate = load(directory / "candidate.json") if (directory / "candidate.json").exists() else None
     baseline = load(directory / "baseline.json") if (directory / "baseline.json").exists() else None
+    replay = load(directory / "replay.json") if (directory / "replay.json").exists() else None
     if candidate is None:
-        return {"status": "NOT_RUN", "reason": "Run verification.", "candidate": None, "baseline": baseline}
+        return {
+            "status": "NOT_RUN",
+            "reason": "Run verification.",
+            "candidate": None,
+            "baseline": baseline,
+            "replay": replay,
+        }
     if candidate["fingerprint"] != fingerprint(repo, task):
         status, reason = "STALE", "Code, policy, requirements or assessment changed; rerun verification."
     elif candidate["status"] != "PASS":
         status, reason = candidate["status"], "Resolve failed, skipped or unavailable checks."
-    elif (
-        not baseline
-        or baseline["status"] != "EXPECTED_FAILURE"
-        or baseline.get("task_sha256") != digest(canonical(task))
-        or baseline.get("test_sha256") != digest(safe_path(repo, profile()["test_file"]).read_bytes())
+    elif not any(
+        e
+        and e.get("status") == "EXPECTED_FAILURE"
+        and e.get("task_sha256") == digest(canonical(task))
+        and e.get("test_sha256") == digest(safe_path(repo, profile()["test_file"]).read_bytes())
+        for e in (baseline, replay)
     ):
         status, reason = (
             "INCOMPLETE",
@@ -695,9 +867,17 @@ def readiness(repo: Path, task: dict) -> dict:
         status, reason = "FAST_CHECKS_PASSED", "Run full verification before calling the PR clean."
     elif not any(c["id"] == "test-strength" and c["status"] == "PASS" for c in candidate.get("checks", [])):
         status, reason = "INCOMPLETE", "Full verification must include the disposable fix-removal replay."
+    elif set(required_checks()) != {c["id"] for c in candidate.get("checks", [])}:
+        status, reason = "INCOMPLETE", "Executed checks do not match the required profile checks."
     else:
         status, reason = (
             "READY_FOR_HUMAN_REVIEW",
             "Local required checks passed. Remote CI and human review are separate.",
         )
-    return {"status": status, "reason": reason, "candidate": candidate, "baseline": baseline}
+    return {
+        "status": status,
+        "reason": reason,
+        "candidate": candidate,
+        "baseline": baseline,
+        "replay": replay,
+    }

@@ -3,7 +3,23 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
-from .core import digest, fingerprint, git, load, read_task, readiness, task_dir, write
+from .core import (
+    canonical,
+    digest,
+    fingerprint,
+    git,
+    load,
+    patch_bytes,
+    policy_provenance,
+    profile,
+    read_task,
+    readiness,
+    safe_path,
+    task_dir,
+    write,
+)
+from .reviewer_text import inventory
+from .reviewer_text import markdown as approval_markdown
 
 
 def render(repo: Path, task_id: str) -> dict:
@@ -27,9 +43,27 @@ def render(repo: Path, task_id: str) -> dict:
         status = "PASS" if statuses and set(statuses) == {"PASS"} else ", ".join(sorted(set(statuses)))
         rows.append((criterion["id"], criterion["text"], "STALE" if stale else status, criterion["tests"]))
     baseline_status = "STALE" if stale else baseline.get("status", "NOT_RUN")
+    if (
+        baseline
+        and not stale
+        and (
+            baseline.get("test_sha256") != digest(safe_path(repo, profile()["test_file"]).read_bytes())
+            or baseline.get("task_sha256") != digest(canonical(task))
+        )
+    ):
+        baseline_status = "HISTORICAL (task or test changed)"
+    if "replay" in baseline.get("origin", "").lower():
+        baseline_status = "NOT_RUN (legacy record contains replay evidence only)"
     strength = next((c for c in checks if c["id"] == "test-strength"), {})
     strength_status = "STALE" if stale else strength.get("status", "NOT_RUN")
-    patch = git(repo, "diff", "--binary", task["base_sha"], "--", *task["editable_files"])
+    patch = patch_bytes(repo, task)
+    policy = policy_provenance(repo)
+    text_inventory = inventory(repo, task)
+    approval = approval_markdown(text_inventory, task["title"])
+    write(
+        directory / "reviewer-text.json",
+        {"approval": "NOT_RUN", "patch_sha256": digest(patch), "entries": text_inventory},
+    )
     patch_paths = (
         git(repo, "diff", "--name-only", task["base_sha"], "--", *task["editable_files"])
         .decode()
@@ -70,7 +104,7 @@ def render(repo: Path, task_id: str) -> dict:
     md += [f"- {i}: " + ", ".join(f"`{t}`" for t in tests) for i, _, _, tests in rows]
     md += [
         "",
-        f"Original implementation: {baseline_status}.",
+        f"Pre-implementation baseline: {baseline_status}.",
         f"Fix-removal replay: {strength_status}.",
         "The replay runs current tests against the pinned original implementation in a disposable snapshot. A PASS means the intended regression failed again.",
         "",
@@ -89,7 +123,11 @@ def render(repo: Path, task_id: str) -> dict:
         "",
         "## DevOps — delivery handoff",
         f"- Upstream base: `{task['base_sha']}`",
-        f"- Kit content digest: `{candidate.get('kit_sha256', 'NOT_RUN')}`",
+        f"- Current runner kit digest: `{policy['runner_kit_sha256']}`",
+        f"- Released/installation reference digest: `{policy['released_kit_sha256']}`",
+        f"- Reference source: {policy['reference_source']}",
+        f"- Required full checks: {len(policy['full_required_checks'])}; executed in candidate: {len(checks)}.",
+        "- Only fork CI enforces policy integrity. Its base policy and workflow require maintainer protection.",
         f"- Current patch digest: `{digest(patch)}`",
         f"- Environment: `{candidate.get('runtime', {})}`",
         "- Remote CI: NOT_RUN. Additive workflow configured; inspect the actual fork PR job before promotion.",
@@ -104,8 +142,9 @@ def render(repo: Path, task_id: str) -> dict:
         "- An external Cursor tool can access beyond these helpers unless an operator provides separate isolation. Disable external retrieval for the rehearsal.",
         "- Fresh Cursor rule discovery and autonomous completion remain UNVERIFIED until the operator records a fresh-session rehearsal.",
         "- Reports are snapshots. Run report again after edits; copied HTML cannot detect later filesystem changes.",
-        "- No human approvals are fabricated. Review all PR wording before publishing.",
+        "- No human approvals are fabricated. Review all PR wording, commit text, error strings, docstrings and comments before publishing.",
     ]
+    md += ["", approval]
     markdown = "\n".join(md) + "\n"
     (directory / "review.md").write_text(markdown)
 
@@ -153,8 +192,9 @@ body{margin:0;background:#f1f4f8;color:#18283c;font:16px/1.55 system-ui,sans-ser
     document += f'<p>RAMP KIT / SHARED CHANGE RECORD</p><h1>{esc(task["title"])}</h1><p class="status">{esc(state["status"])} — {esc(state["reason"])}</p>'
     document += f"<h2>PM — requested outcome</h2><p>{esc(task['request'])}</p><table><thead><tr><th>Criterion</th><th>Expected behaviour</th><th>Evidence</th></tr></thead><tbody>{criteria_html}</tbody></table><p>PM next action: confirm the criteria. No business sign-off is implied.</p>"
     document += other_sections[0]
-    document += f"<section><h2>QA — tests and sensitivity</h2><p>Original implementation: {esc(baseline_status)}. Fix-removal replay: {esc(strength_status)}.</p><p>Replay PASS means the regression failed again after restoring original implementation in a disposable snapshot.</p><details><summary>Acceptance criteria → executed tests</summary><ul>{mapping}</ul></details><table><thead><tr><th>Check</th><th>Status</th><th>Duration</th><th>Evidence</th></tr></thead><tbody>{''.join(check_html)}</tbody></table><p>QA next action: inspect the baseline and candidate logs. GPU behaviour and the full Diffusers suite are outside this check.</p></section>"
-    document += "".join(other_sections[1:]) + "</main></html>"
+    document += f"<section><h2>QA — tests and sensitivity</h2><p>Pre-implementation baseline: {esc(baseline_status)}. Fix-removal replay: {esc(strength_status)}.</p><p>Replay PASS means the regression failed again after restoring original implementation in a disposable snapshot.</p><details><summary>Acceptance criteria → executed tests</summary><ul>{mapping}</ul></details><table><thead><tr><th>Check</th><th>Status</th><th>Duration</th><th>Evidence</th></tr></thead><tbody>{''.join(check_html)}</tbody></table><p>QA next action: inspect the baseline and candidate logs. GPU behaviour and the full Diffusers suite are outside this check.</p></section>"
+    document += "".join(other_sections[1:])
+    document += f"<section><h2>Exact wording awaiting human approval</h2><pre>{esc(approval)}</pre></section></main></html>"
     (directory / "review.html").write_text(document)
     pr = [
         f"# {task['title']}",
@@ -176,7 +216,7 @@ body{margin:0;background:#f1f4f8;color:#18283c;font:16px/1.55 system-ui,sans-ser
         "",
         "DRAFT: a human must review and approve this exact wording before publication. Remote CI, human approval and deployment have not been established.",
     ]
-    (directory / "PR-DRAFT.md").write_text("\n".join(pr) + "\n")
+    (directory / "PR-DRAFT.md").write_text("\n".join(pr) + "\n\n" + approval)
     (directory / "contribution.patch").write_bytes(patch)
     write(
         directory / "handoff.json",
@@ -184,6 +224,10 @@ body{margin:0;background:#f1f4f8;color:#18283c;font:16px/1.55 system-ui,sans-ser
             "status": state["status"],
             "fingerprint": fingerprint(repo, task),
             "patch_sha256": digest(patch),
+            "policy": policy,
+            "required_checks": len(policy["full_required_checks"]),
+            "executed_checks": len(checks),
+            "reviewer_text_approval": "NOT_RUN",
             "criteria": rows,
         },
     )

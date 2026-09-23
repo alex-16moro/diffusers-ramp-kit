@@ -24,7 +24,8 @@ def onboard(source: Path, destination: Path) -> dict:
     )
     if result.returncode:
         raise core.RampError(f"Cannot create onboarding checkout: {result.stderr}")
-    core.git(destination, "checkout", "-b", "ramp/first-contribution", core.profile()["base_sha"])
+    # This is a new clone with no user edits; the source may already use this branch name.
+    core.git(destination, "checkout", "-B", "ramp/first-contribution", core.profile()["base_sha"])
     core.git(destination, "remote", "set-url", "origin", core.profile()["upstream"])
     installed = attach(destination)
     return {
@@ -63,6 +64,8 @@ def attach(repo: Path) -> dict:
     mapping[".github/workflows/ramp-kit.yml"] = root / "templates/fork-ci.yml"
     mapping[".cursorignore"] = root / "templates/cursorignore.txt"
     # All conflict checks happen before writes; existing instruction files are never touched.
+    ignore = core.safe_path(repo, ".gitignore")
+    old_ignore = ignore.read_text() if ignore.exists() else ""
     for relative in mapping:
         if core.safe_path(repo, relative).exists():
             raise core.RampError(f"Attachment would overwrite {relative}; choose a clean checkout.")
@@ -70,6 +73,15 @@ def attach(repo: Path) -> dict:
         target = core.safe_path(repo, relative)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
+    # Upstream ignores .cursor and *.lock. Preserve unrelated ignore rules and
+    # expose only the exact rule files managed by this installation.
+    ignore.write_text(
+        old_ignore.rstrip("\n") + "\n\n# Ramp Kit managed installation\n"
+        "!/.cursor/\n/.cursor/*\n!/.cursor/rules/\n/.cursor/rules/*\n"
+        "!/.cursor/rules/ramp-entry.mdc\n!/.cursor/rules/ramp-scheduler.mdc\n"
+        "/.ramp-venv/\n"
+    )
+    mapping[".gitignore"] = ignore
     manifest = {
         "kit_sha256": core.kit_hash(root),
         "base_sha": core.profile()["base_sha"],

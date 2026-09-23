@@ -21,6 +21,6 @@ Commands: `prepare --spec <new-spec>`, cited `assess`, baseline verification bef
 
 ## Boundaries
 
-Approved bootstrap sources are the pinned Hugging Face Git repository, PyPI packages in `runtime/requirements.lock`, and the official PyTorch CPU package index for Torch. GitHub Actions acquisition is a CI setup dependency. No model weights or external retrieval are needed by the contribution check itself.
+Approved bootstrap sources are the pinned Hugging Face Git repository, PyPI packages in `runtime/requirements.txt`, and the official PyTorch CPU package index for Torch. GitHub Actions acquisition is a CI setup dependency. No model weights or external retrieval are needed by the contribution check itself.
 
 Context retrieval is restricted to profile paths and symbols; editable files come from the task/profile; commands come from the approved profile. Tests use local source and offline Hugging Face flags. These helpers reject traversal/symlinks and off-scope changes. They do not isolate the Cursor process or remove host credentials/network access: whole-agent isolation remains UNMET. The demonstration assumes a trusted operator and a dedicated checkout, not hostile code.

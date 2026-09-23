@@ -1,8 +1,18 @@
 {
-  "protected_upstream_instructions_and_workflows": "PASS",
-  "CI_yaml_and_shared_entry_point": "PASS",
-  "kit_digest_matches_attached_copy": "PASS",
-  "kit_sha256": "b334e02c36417d19a6d41c20c08cc413425d3ae373c73fb8c82681dd4522186b",
-  "remote_ci": "NOT_RUN",
-  "cursor_session": "UNVERIFIED"
+  "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+  "kit_unit_tests": "PASS",
+  "kit_lint": "PASS",
+  "kit_format": "PASS",
+  "normal_commit_fresh_clone_doctor": "PASS",
+  "cold_bootstrap": "PASS",
+  "local_full_checks": 12,
+  "simulated_ci_full_checks": 12,
+  "local_patch_sha256": "5380733056ba1589e9cfebe911013967d661c8c25102c4443833847587462995",
+  "simulated_ci_patch_sha256": "5380733056ba1589e9cfebe911013967d661c8c25102c4443833847587462995",
+  "patch_digests_match": true,
+  "CI_yaml_and_shared_entry_point": "LOCAL_SIMULATION_PASS; remote fork CI NOT_RUN",
+  "clean_cursor_acceptance": "NOT_RUN",
+  "remote_fork_ci": "NOT_RUN",
+  "whole_agent_isolation": "UNMET",
+  "provenance": "scripts/reproduce.py from a new documented bootstrap; scripts/export_evidence.py reran kit tests and lint"
 }
