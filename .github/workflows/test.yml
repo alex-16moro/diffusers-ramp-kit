@@ -5,9 +5,6 @@ permissions:
 jobs:
   unit:
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: diffusers-ramp-kit
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,7 +31,7 @@ jobs:
           git -C "$RUNNER_TEMP/source" fetch --depth=1 origin 0121a91f9d419ff7234c8a5923f82c244e6f1914
           git -C "$RUNNER_TEMP/source" checkout --detach FETCH_HEAD
       - name: Cold bootstrap, contribution replay and local CI simulation
-        run: python diffusers-ramp-kit/scripts/reproduce.py --source "$RUNNER_TEMP/source" --work "$RUNNER_TEMP/rehearsal" --output "$RUNNER_TEMP/evidence"
+        run: python scripts/reproduce.py --source "$RUNNER_TEMP/source" --work "$RUNNER_TEMP/rehearsal" --output "$RUNNER_TEMP/evidence"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
