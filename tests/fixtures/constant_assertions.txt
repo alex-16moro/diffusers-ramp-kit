@@ -1,0 +1,4 @@
+# Negative fixture: a literal-only assertion must not establish acceptance evidence.
+class Tests:
+    def test_empty(self):
+        self.assertTrue(True)

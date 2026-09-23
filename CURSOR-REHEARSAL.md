@@ -9,10 +9,13 @@ The agent challenged a fallback-to-default proposal, created a pinned checkout f
 
 ## Clean acceptance run
 
-Status: NOT_RUN. Complete from a fresh Cursor session after installing the corrected kit.
+Status: NOT_RUN. Complete from a fresh Cursor session in a clone of the reviewed fork `ramp-base`, on a separate engineer host that has never contained the kit repository or completed solutions.
 
 - Cursor version, model, OS and execution environment:
-- Absolute folder open in Cursor:
+- Absolute folder open in Cursor (clone of `ramp-base`):
+- Fork remote URL, reviewed installation SHA, branch and HEAD before creating the contribution branch:
+- Fresh engineer-host provisioning record; kit/fixtures/history never present:
+- Parent folder `ls -la ..`, host `contribution.patch` search and scan-error review:
 - Kit digest and installation/source revision:
 - Before-start `git status --short` and `git stash list` output:
 - Screenshot of Rules panel showing `ramp-entry.mdc` as Always Apply:
@@ -20,7 +23,7 @@ Status: NOT_RUN. Complete from a fresh Cursor session after installing the corre
 - Web/MCP/external retrieval disabled:
 - Exact request: “Make passing an empty custom timestep list produce a clear error while preserving valid inputs. Could we just replace an empty list with `[999]`?”
 - Source file/line/symbol citations and pushback:
-- Agent-written spec and generated mapped scaffold:
+- Agent-written spec from request/source (not a copied example), and generated scaffold preserving existing tests:
 - Pre-implementation regression and separately recorded replay:
 - Implementation and copied-method propagation:
 - All `.ramp/*/runs/*/result.json` files and associated logs:
@@ -38,4 +41,4 @@ Record the fallback-to-default variant as a labelled generalisation run. After t
 
 ## Fork CI evidence
 
-Pending: real PR against pinned `ramp-base`, Actions URL and conclusion, exact base/head SHAs, local patch digest and matching CI patch digest. Kit-repository CI and local simulations do not satisfy this gate.
+Pending: real PR against pinned `ramp-base`, Actions URL and conclusion, exact base/head SHAs, local patch digest and matching CI patch digest for the identical submitted patch (not a required match to a differently worded packaged fixture). Kit-repository CI and local simulations do not satisfy this gate.

@@ -12,27 +12,41 @@ from .report import render
 
 
 def onboard(source: Path, destination: Path) -> dict:
-    """Create a separate pinned checkout with no completed solution or old task evidence."""
+    """Platform-owner preparation of the pinned ramp-base installation checkout."""
     destination = destination.resolve()
     if destination.exists():
         raise core.RampError("Onboarding destination must not exist; choose a new directory.")
     core.git(source, "cat-file", "-e", f"{core.profile()['base_sha']}^{{commit}}")
-    result = subprocess.run(
-        ["git", "clone", "--no-hardlinks", "--no-checkout", str(source.resolve()), str(destination)],
-        capture_output=True,
-        text=True,
+    retry = (
+        f"Choose a new destination under a directory you can write, for example "
+        f"{Path.cwd() / 'ramp-base-checkout'} inside the current workspace, "
+        "then rerun onboard with --dest. Confirm its parent is writable first; "
+        "no alternative destination was selected automatically."
     )
+    try:
+        result = subprocess.run(
+            ["git", "clone", "--no-hardlinks", "--no-checkout", str(source.resolve()), str(destination)],
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        raise core.RampError(f"ONBOARD_CREATE_FAILED: cannot create {destination}: {exc}. {retry}") from exc
     if result.returncode:
-        raise core.RampError(f"Cannot create onboarding checkout: {result.stderr}")
+        reason = "Git could not clone the pinned source"
+        if any(text in result.stderr.lower() for text in ("permission denied", "read-only file system")):
+            reason = "The destination or its parent is not writable"
+        raise core.RampError(
+            f"ONBOARD_CREATE_FAILED: {reason}: {destination}. {retry} Git detail: {result.stderr.strip()}"
+        )
     # This is a new clone with no user edits; the source may already use this branch name.
-    core.git(destination, "checkout", "-B", "ramp/first-contribution", core.profile()["base_sha"])
+    core.git(destination, "checkout", "-B", "ramp-base", core.profile()["base_sha"])
     core.git(destination, "remote", "set-url", "origin", core.profile()["upstream"])
     installed = attach(destination)
     return {
         "status": "ONBOARDING_READY",
         "checkout": str(destination),
         "attachment": installed,
-        "next_action": "Bootstrap dependencies, then open ONLY this checkout in a fresh Cursor session. Do not add the kit bundle or completed examples to that workspace.",
+        "next_action": "Platform owner: review and commit the installation on ramp-base, then publish it to the approved fork following RELEASE.md. The engineer clones only ramp-base on a separate host without the kit repository or solution evidence, bootstraps, and opens that clone in Cursor (START_HERE.md).",
     }
 
 

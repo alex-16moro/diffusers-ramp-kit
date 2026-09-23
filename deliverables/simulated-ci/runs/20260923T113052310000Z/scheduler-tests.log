@@ -1,0 +1,56 @@
+........................................................................ [ 92%]
+......                                                                   [100%]
+=============================== warnings summary ===============================
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_lms_discrete.py:179: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_lms_discrete.py:330: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_k_dpm_2_discrete.py:308: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py: 2002 warnings
+tests/schedulers/test_scheduler_ddpm_parallel.py: 2002 warnings
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_k_dpm_2_discrete.py:427: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    log_sigma = np.log(np.maximum(sigma, 1e-10))
+
+tests/schedulers/test_scheduler_ddpm.py: 4004 warnings
+tests/schedulers/test_scheduler_ddpm_parallel.py: 4004 warnings
+  /workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:45: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    return conv.wrap(result, to_scalar=False)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_heun_discrete.py:348: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_k_dpm_2_ancestral_discrete.py:308: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py: 2002 warnings
+tests/schedulers/test_scheduler_ddpm_parallel.py: 2002 warnings
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_k_dpm_2_ancestral_discrete.py:384: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    log_sigma = np.log(np.maximum(sigma, 1e-10))
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_dpmsolver_sde.py:451: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/rereview-integration-candidate/src/diffusers/schedulers/scheduling_euler_ancestral_discrete.py:214: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /workspace/scratch/306c018f6a72/rereview-integration-candidate/.ramp/empty-timesteps/runs/20260923T113052310000Z/scheduler-tests.xml -
+78 passed, 16030 warnings in 3.00s

@@ -8,7 +8,18 @@ The check list comes from the pinned `.github/workflows/pr_tests.yml` repository
 
 ## How fork CI is installed
 
-Create a dedicated `ramp-base` branch at `0121a91f9d419ff7234c8a5923f82c244e6f1914` on the user-owned Diffusers fork. Do not attach to newer `main` or a worktree containing earlier overlays. Run `attach` from the reviewed kit. It adds narrow `.gitignore` exceptions for the two Cursor rules and uses `runtime/requirements.txt`; normal `git add -A` must retain all manifest paths. Inspect the staged files and manifest before committing under the applicable human-review rules. Clone the installation commit and run `doctor` before opening a contribution PR against `ramp-base`.
+### Platform owner: publish the sole engineer starting branch
+
+Perform these steps on a platform-owner host, separate from the machine that runs the clean Cursor session. Keep this kit repository and its full solution fixtures/evidence on the owner host. The engineer never clones this repository.
+
+1. Obtain the approved kit revision and the upstream Diffusers pin `0121a91f9d419ff7234c8a5923f82c244e6f1914` in a source clone.
+2. From the kit root, run `python3.12 run.py --repo /path/to/diffusers-source onboard --dest /new/writable/ramp-base-checkout`. This creates `ramp-base` at the pin and attaches only the runtime, profile, recipe, example schema and Cursor/CI guidance. It excludes the kit tests, complete solutions, historical records and generated deliverables. Alternatively, check out the pin on a new `ramp-base` branch and run `attach`; this is the same owner preparation, not another engineer journey.
+3. Bootstrap and run `doctor` in the new checkout. Inspect `git diff`, `git status` and `.ramp-kit/attachment.json`. The attachment adds narrow `.gitignore` exceptions for the two Cursor rules and uses `requirements.txt`; normal `git add -A` must retain every manifest path. Confirm no `.ramp/` task or completed patch is included. Review the branch ancestry: only the pinned upstream history and approved installation changes may precede the engineer session.
+4. Under the applicable human-review rules, approve the installation diff and exact commit wording, stage with `git add -A`, and commit. Set the checkout's `origin` to the **user-owned fork**, never the upstream repository, then publish **only** `ramp-base` with `git push origin ramp-base`. If that branch already exists, review its state and an explicit upgrade; do not force-push or combine it with newer `main` or previous solutions.
+5. Test a new network clone using `git clone --single-branch --branch ramp-base --no-tags FORK_URL NEW_PATH`; bootstrap and run `doctor`. Keep the pinned ancestor available (no shallow depth-one clone). Verify every attachment manifest path is tracked. Supply the engineer with the fork URL and exact reviewed installation SHA, plus START_HERE.md without any solution bundle.
+6. The engineer follows START_HERE.md on a fresh host: clone this branch, verify its SHA, bootstrap, record the clean host/workspace evidence and open only that clone in Cursor. The contribution PR targets this same branch.
+
+`onboard` does not push a branch, prove a clean engineer host or approve reviewer-visible text. Publication is a platform-owner action. The kit's CLI rehearsal runs on the owner side with a labelled known fixture; it is not a clean Cursor session.
 
 The repository-root `.github/workflows/test.yml` runs kit tests, the distribution manifest check, and the CLI integration rehearsal. Run the documented commands from the repository root. This workflow is separate from `templates/fork-ci.yml`, which is installed into a Diffusers checkout; kit CI is not evidence that a Diffusers fork PR has run.
 

@@ -40,26 +40,26 @@ The replay runs current tests against the pinned original implementation in a di
 
 | Check | Status | Duration | Log |
 |---|---|---|---|
-| acceptance | PASS | 4.643s | [acceptance log](runs/20260923T100822420118Z/acceptance.log) |
-| scheduler-tests | PASS | 6.433s | [scheduler-tests log](runs/20260923T100822420118Z/scheduler-tests.log) |
-| lint | PASS | 0.025s | [lint log](runs/20260923T100822420118Z/lint.log) |
-| format | PASS | 0.034s | [format log](runs/20260923T100822420118Z/format.log) |
-| upstream-quality | PASS | 6.356s | [upstream-quality log](runs/20260923T100822420118Z/upstream-quality.log) |
-| copies | PASS | 1.435s | [copies log](runs/20260923T100822420118Z/copies.log) |
-| dummies | PASS | 0.033s | [dummies log](runs/20260923T100822420118Z/dummies.log) |
-| support-list | PASS | 0.022s | [support-list log](runs/20260923T100822420118Z/support-list.log) |
-| forward-docstrings | PASS | 2.999s | [forward-docstrings log](runs/20260923T100822420118Z/forward-docstrings.log) |
-| dependency-table | PASS | 0.138s | [dependency-table log](runs/20260923T100822420118Z/dependency-table.log) |
-| dependencies | PASS | 4.724s | [dependencies log](runs/20260923T100822420118Z/dependencies.log) |
-| test-strength | PASS | 5.0s | [test-strength log](runs/20260923T100822420118Z/test-strength.log) |
+| acceptance | PASS | 4.865s | [acceptance log](runs/20260923T113052310000Z/acceptance.log) |
+| scheduler-tests | PASS | 6.489s | [scheduler-tests log](runs/20260923T113052310000Z/scheduler-tests.log) |
+| lint | PASS | 0.029s | [lint log](runs/20260923T113052310000Z/lint.log) |
+| format | PASS | 0.024s | [format log](runs/20260923T113052310000Z/format.log) |
+| upstream-quality | PASS | 6.509s | [upstream-quality log](runs/20260923T113052310000Z/upstream-quality.log) |
+| copies | PASS | 1.464s | [copies log](runs/20260923T113052310000Z/copies.log) |
+| dummies | PASS | 0.026s | [dummies log](runs/20260923T113052310000Z/dummies.log) |
+| support-list | PASS | 0.02s | [support-list log](runs/20260923T113052310000Z/support-list.log) |
+| forward-docstrings | PASS | 2.901s | [forward-docstrings log](runs/20260923T113052310000Z/forward-docstrings.log) |
+| dependency-table | PASS | 0.131s | [dependency-table log](runs/20260923T113052310000Z/dependency-table.log) |
+| dependencies | PASS | 4.752s | [dependencies log](runs/20260923T113052310000Z/dependencies.log) |
+| test-strength | PASS | 4.672s | [test-strength log](runs/20260923T113052310000Z/test-strength.log) |
 
 Not covered: arbitrary scheduler types, GPU execution, all input shapes and diffusion numerical correctness.
 QA next action: inspect the failing baseline and passing candidate logs; replay any disputed criterion.
 
 ## DevOps — delivery handoff
 - Upstream base: `0121a91f9d419ff7234c8a5923f82c244e6f1914`
-- Current runner kit digest: `87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57`
-- Released/installation reference digest: `87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57`
+- Current runner kit digest: `f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d`
+- Installation digest: `f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d`
 - Reference source: attachment.json at installation; locally editable, not an independent trust anchor
 - Required full checks: 12; executed in candidate: 12.
 - Only fork CI enforces policy integrity. Its base policy and workflow require maintainer protection.

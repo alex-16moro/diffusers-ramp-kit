@@ -46,7 +46,7 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 E           IndexError: list index out of range
 
 src/diffusers/schedulers/scheduling_ddpm.py:303: IndexError
-- generated xml file: /tmp/ramp-strength-bsxj7vn7/checkout/.ramp-replay/regression.xml -
+- generated xml file: /tmp/ramp-strength-f_tlzin5/checkout/.ramp-replay/regression.xml -
 =========================== short test summary info ============================
 FAILED tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps
-1 failed in 1.24s
+1 failed in 1.28s

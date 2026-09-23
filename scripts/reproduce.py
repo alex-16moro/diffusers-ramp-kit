@@ -80,12 +80,21 @@ def main():
     candidate = work.parent / (work.name + "-candidate")
     if policy.exists() or candidate.exists():
         raise RuntimeError("Policy/candidate destination already exists; choose another --work")
-    run(["git", "clone", "--no-hardlinks", work, policy], work, "clone-installation")
+    run(
+        ["git", "clone", "--no-local", "--single-branch", "--branch", "ramp-base", "--no-tags", work, policy],
+        work,
+        "clone-installation",
+    )
     cli("fresh-clone-doctor", "doctor", runner=policy / ".ramp-kit/run.py", checkout=policy)
+    run(["git", "switch", "-c", "ramp/fixture-contribution"], work, "contribution-branch")
 
     # Deliberately use a known fixture for reproducibility. A clean Cursor session
     # must independently derive its spec and implementation from the user request.
     cli("prepare", "prepare", "--spec", KIT / "examples/empty-timesteps.json")
+    scaffold = (work / ".ramp/empty-timesteps/test-scaffold.txt").read_text()
+    existing_method = "test_custom_timesteps_passing_both_num_inference_steps_and_timesteps"
+    if f"def {existing_method}" in scaffold or f"do not modify: {existing_method}" not in scaffold:
+        raise RuntimeError("Scaffold did not preserve the existing upstream mutual-exclusion test")
     cli(
         "assess",
         "assess",

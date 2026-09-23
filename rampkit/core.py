@@ -243,6 +243,7 @@ def prepare(repo: Path, spec: Path) -> dict:
     if check["status"] != "PASS":
         raise RampError("; ".join(check["findings"]))
     task["base_sha"] = prof["base_sha"]
+    scaffold = test_scaffold(repo, task)
     write(directory / "task.json", task)
     write(
         directory / "architecture.json",
@@ -255,7 +256,7 @@ def prepare(repo: Path, spec: Path) -> dict:
         },
     )
     write(directory / "context-index.json", {"base_sha": prof["base_sha"], "sources": prof["sources"]})
-    (directory / "test-scaffold.txt").write_text(test_scaffold(task))
+    (directory / "test-scaffold.txt").write_text(scaffold)
     return {
         "status": "PREPARED",
         "task": str(directory / "task.json"),
@@ -299,7 +300,7 @@ def attachment(repo: Path) -> dict:
     return load(path) if path.is_file() else {"files": {}}
 
 
-def test_scaffold(task: dict) -> str:
+def test_scaffold(repo: Path, task: dict) -> str:
     """Generate incomplete method stubs from the validated task, never a solution."""
     groups = {}
     for criterion in task["criteria"]:
@@ -311,8 +312,26 @@ def test_scaffold(task: dict) -> str:
         "# Implement real assertions before baseline verification. Stubs deliberately fail.",
     ]
     for (path, klass), methods in groups.items():
+        try:
+            tree = ast.parse(safe_path(repo, path).read_text())
+        except (OSError, SyntaxError) as exc:
+            raise RampError(f"Cannot inspect mapped test file {path}: {exc}") from exc
+        existing = {
+            method.name
+            for cls in tree.body
+            if isinstance(cls, ast.ClassDef) and cls.name == klass
+            for method in cls.body
+            if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+        }
         lines += ["", f"# {path}", f"class {klass}:"]
         for method, criteria in methods.items():
+            if method in existing:
+                lines += [
+                    f"    # EXISTS — mapped as evidence, do not modify: {method}",
+                    f"    # Acceptance: {', '.join(criteria)}",
+                    "",
+                ]
+                continue
             lines += [
                 f"    def {method}(self):",
                 f"        # Acceptance: {', '.join(criteria)}",
@@ -320,6 +339,19 @@ def test_scaffold(task: dict) -> str:
                 "",
             ]
     return "\n".join(lines) + "\n"
+
+
+def constant_expression(node: ast.AST) -> bool:
+    """Recognize literal-only assertion operands without evaluating test code."""
+    if isinstance(node, ast.Constant):
+        return True
+    if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+        return all(constant_expression(n) for n in node.elts)
+    if isinstance(node, ast.Dict):
+        return all(n is not None and constant_expression(n) for n in [*node.keys, *node.values])
+    if isinstance(node, (ast.UnaryOp, ast.BinOp, ast.BoolOp, ast.Compare, ast.IfExp)):
+        return all(constant_expression(n) for n in ast.iter_child_nodes(node) if isinstance(n, ast.expr))
+    return False
 
 
 def assertion_findings(repo: Path, task: dict) -> list[dict]:
@@ -351,14 +383,18 @@ def assertion_findings(repo: Path, task: dict) -> list[dict]:
 
         def has_assertion(node):
             if isinstance(node, ast.Assert):
-                return True
+                return not constant_expression(node.test)
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
                 owner = node.func.value
                 if isinstance(owner, ast.Name):
                     if owner.id == "self" and node.func.attr.startswith("assert"):
-                        return True
+                        # A dynamic failure message must not make assertTrue(True) count.
+                        unary = {"assertTrue", "assertFalse", "assertIsNone", "assertIsNotNone"}
+                        operands = node.args[:1] if node.func.attr in unary else node.args[:2]
+                        operands += [kw.value for kw in node.keywords if kw.arg != "msg"]
+                        return bool(operands) and not all(constant_expression(n) for n in operands)
                     if owner.id == "pytest" and node.func.attr == "raises":
-                        return True
+                        return any(not constant_expression(n) for n in node.args)
             # Assertions in uncalled nested helpers/classes do not count.
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
                 return False
@@ -370,7 +406,7 @@ def assertion_findings(repo: Path, task: dict) -> list[dict]:
                     "rule": "TEST-ASSERTIONS",
                     "path": path,
                     "line": methods[0].lineno,
-                    "message": f"{node_id} has no supported assertion. Add a behavioural assert, self.assert*, or pytest.raises.",
+                    "message": f"{node_id} has no non-constant supported assertion. Add a behavioural assert, self.assert*, or pytest.raises; literal-only assertions do not count.",
                 }
             )
     return findings
@@ -413,7 +449,7 @@ def policy_provenance(repo: Path) -> dict:
     installed = attachment(repo).get("kit_sha256", "UNAVAILABLE")
     return {
         "runner_kit_sha256": kit_hash(),
-        "released_kit_sha256": installed,
+        "installation_kit_sha256": installed,
         "reference_source": "attachment.json at installation; locally editable, not an independent trust anchor",
         "full_required_checks": required_checks(),
         "integrity_boundary": "Only fork CI enforces policy integrity.",

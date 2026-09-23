@@ -1,7 +1,7 @@
 {
   "status": "READY_FOR_HUMAN_REVIEW",
   "reason": "Local required checks passed. Remote CI and human review are separate.",
-  "report": "/workspace/scratch/306c018f6a72/review-integration-final/.ramp/empty-timesteps/review.html",
-  "markdown": "/workspace/scratch/306c018f6a72/review-integration-final/.ramp/empty-timesteps/review.md",
-  "pr_draft": "/workspace/scratch/306c018f6a72/review-integration-final/.ramp/empty-timesteps/PR-DRAFT.md"
+  "report": "/workspace/scratch/306c018f6a72/rereview-integration/.ramp/empty-timesteps/review.html",
+  "markdown": "/workspace/scratch/306c018f6a72/rereview-integration/.ramp/empty-timesteps/review.md",
+  "pr_draft": "/workspace/scratch/306c018f6a72/rereview-integration/.ramp/empty-timesteps/PR-DRAFT.md"
 }

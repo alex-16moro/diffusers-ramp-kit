@@ -8,20 +8,19 @@ An agent-facing, repository-installed workflow for a first reviewable Diffusers 
 
 Run commands from this repository root. `run.py` is the entry point; `rampkit/` contains the Python implementation; `profiles/`, `recipes/`, `cursor/`, `runtime/` and `templates/` contain installed resources. `tests/` and `scripts/` hold verification and evidence tooling. `deliverables/` and `review-checks/` contain generated evidence; `historical/` preserves superseded records.
 
-## Bootstrap and attach
+## One engineer starting point
 
-1. Check out the pinned upstream commit in a disposable Diffusers worktree. Preserve any existing worktree and upstream instructions.
-2. Use Python 3.12 on Linux x86-64. Run `bash runtime/bootstrap.sh /absolute/path/to/diffusers` while dependencies can be downloaded, then activate that checkout's `.ramp-venv`.
-3. From this kit directory, run `python run.py --repo /absolute/path/to/diffusers doctor`, then `python run.py --repo /absolute/path/to/diffusers attach`.
-4. Open the checkout in a fresh Cursor session. Ask: “Make passing an empty custom timestep list produce a clear error. Could we just replace it with `[999]`?” The always-on Cursor rule leads the agent through the recipe. An engineer need not hand-author the JSON or commands.
+The platform owner prepares and publishes the reviewed `ramp-base` branch on the user-owned Diffusers fork, using `onboard`/`attach` on a separate host as described in [RELEASE.md](RELEASE.md). The engineer follows [START_HERE.md](START_HERE.md): clone only that fork branch, bootstrap `.ramp-venv`, run `doctor`, and open the clone in a fresh Cursor session. The same branch supplies onboarding, rule discovery and trusted fork CI policy.
 
-The attachment appends narrowly scoped exceptions to `.gitignore` so plain `git add -A` includes its rules, and adds `.ramp-kit/`, two `.cursor/rules/` files, `.cursorignore`, and an additive fork CI workflow. It refuses conflicting files and does not replace `AGENTS.md`, `.ai/`, or inherited workflows. Run `python .ramp-kit/run.py --repo . doctor` from the Diffusers root to diagnose drift. The kit only reads its approved source paths through `context`; it checks edits against the task's allowlist. These checks are not whole-agent filesystem or network isolation.
+The engineer host must never contain this kit repository or its completed fixtures, `deliverables/` or `historical/` records. A neighbouring folder is still accessible to an agent; workspace instructions alone are insufficient. Keep the source history required for the pinned upstream baseline, but do not fetch contribution branches or solution-bearing history. Record the installation SHA and host/workspace preflight before acceptance.
+
+The attachment appends narrowly scoped `.gitignore` exceptions so plain `git add -A` includes the rules. It adds `.ramp-kit/`, two Cursor rules, `.cursorignore` and an additive fork CI workflow, preserving upstream instructions and workflows. Its context, scope and integrity checks are not whole-agent filesystem/network isolation.
 
 ## Workflow and reset
 
 The agent reads upstream instructions, approved context and the recipe, then records its assessment with `assess`. The proposed `[999]` fallback conflicts with the user's requested behaviour; an empty list should raise a clear `ValueError` in the owning scheduler API. A `REVISE` assessment can record that pushback before a `COMPATIBLE` assessment records the selected plan. The agent writes a new spec under `.ramp/specs/` from the request, using the example only as a schema guide. The agent runs `prepare --spec .ramp/specs/empty-timesteps.json`, adds the three meaningful tests in the existing DDPM test class, and runs `verify empty-timesteps --phase baseline` before editing implementation. The intended failure is an `IndexError` from the original source. It then applies the small guard and uses upstream `utils/check_copies.py --fix_and_overwrite` to refresh the marked parallel copy. `verify empty-timesteps --level full` calls the pinned tests and upstream quality checks; `report empty-timesteps` writes the shared review page, Markdown, PR draft and patch under `.ramp/empty-timesteps/`.
 
-For a fresh rehearsal, create another worktree from the pinned upstream commit and attach the kit there. Do not reset or clean a worktree containing someone's edits. Keep the completed patch and its evidence in a separate worktree; the prepared onboarding state must not show the solution to the new Cursor session.
+For a fresh rehearsal, make another clone of the reviewed `ramp-base` branch on a clean engineer host. Do not reset or clean a checkout containing someone's work. Completed contributions and kit verification fixtures stay on the separate owner/reviewer host; do not make them available to the new Cursor session.
 
 To extend this to another input-validation task, choose the owning API and its tests, update the profile's approved references and edit paths, then create a task spec with concrete criteria and mapped test IDs. Run `doctor`, reproduce the regression on original implementation and verify the changed behaviour. New semantics or a different component may require new recipe code and tests; changing profile data alone does not establish support.
 
