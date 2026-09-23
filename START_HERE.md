@@ -6,7 +6,7 @@ The newcomer experience starts in a fresh Diffusers checkout. Keep this bundle, 
 
 The supported execution environment is Linux x86-64, Python 3.12, CPU Torch 2.7.1. Cursor can be on another computer, but its project terminal must use that environment. Native macOS/Windows dependency installation has not been tested; use a Linux environment for the recorded reproduction. This bundle is run directly with `run.py`; it is not an installable PyPI package.
 
-From the extracted `diffusers-ramp-kit` folder, with Git and Python 3.12 available, run:
+From the root of the cloned `diffusers-ramp-kit` repository, with Git and Python 3.12 available, run:
 
 ```bash
 # Use new paths. If these already exist, choose different names.
