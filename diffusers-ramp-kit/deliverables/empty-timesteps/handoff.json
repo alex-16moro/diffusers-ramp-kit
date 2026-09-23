@@ -1,0 +1,39 @@
+{
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "fingerprint": "0a7a81255e5d61987e5fb9022840952a8fa7189507d88ff50d351396bf8fc561",
+  "patch_sha256": "f9b1cf957b42238c676255e2f0008af4067463c3cab51714634d171b0dba715c",
+  "criteria": [
+    [
+      "AC1",
+      "Both DDPM implementations reject empty custom timesteps with a useful ValueError; argument-conflict errors retain precedence.",
+      "PASS",
+      [
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
+      ]
+    ],
+    [
+      "AC2",
+      "Normal and single-element custom timesteps retain their values and CPU device.",
+      "PASS",
+      [
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_custom_timesteps_validation_preserves_valid_inputs"
+      ]
+    ],
+    [
+      "AC3",
+      "Passing both timestep arguments still raises the existing error.",
+      "PASS",
+      [
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_custom_timesteps_passing_both_num_inference_steps_and_timesteps"
+      ]
+    ],
+    [
+      "AC4",
+      "Existing count-based inference timesteps still work.",
+      "PASS",
+      [
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_count_based_inference_timesteps_unchanged"
+      ]
+    ]
+  ]
+}

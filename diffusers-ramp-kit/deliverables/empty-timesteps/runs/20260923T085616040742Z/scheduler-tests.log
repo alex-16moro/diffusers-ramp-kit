@@ -1,0 +1,105 @@
+.....................F.................................................. [ 92%]
+......                                                                   [100%]
+=================================== FAILURES ===================================
+________________ DDPMSchedulerTest.test_empty_custom_timesteps _________________
+
+self = <tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps>
+
+    def test_empty_custom_timesteps(self):
+        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):
+            scheduler = scheduler_class(**self.get_scheduler_config())
+            with self.assertRaisesRegex(ValueError, "timesteps.*empty"):
+>               scheduler.set_timesteps(timesteps=[])
+
+tests/schedulers/test_scheduler_ddpm.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def set_timesteps(
+        self,
+        num_inference_steps: int = None,
+        device: str | torch.device = None,
+        timesteps: list[int] | None = None,
+    ):
+        """
+        Sets the discrete timesteps used for the diffusion chain (to be run before inference).
+    
+        Args:
+            num_inference_steps (`int`, *optional*):
+                The number of diffusion steps used when generating samples with a pre-trained model. If used,
+                `timesteps` must be `None`.
+            device (`str` or `torch.device`, *optional*):
+                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.
+            timesteps (`list[int]`, *optional*):
+                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default
+                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,
+                `num_inference_steps` must be `None`.
+    
+        """
+        if num_inference_steps is not None and timesteps is not None:
+            raise ValueError("Can only pass one of `num_inference_steps` or `custom_timesteps`.")
+    
+        if timesteps is not None:
+            for i in range(1, len(timesteps)):
+                if timesteps[i] >= timesteps[i - 1]:
+                    raise ValueError("`custom_timesteps` must be in descending order.")
+    
+>           if timesteps[0] >= self.config.num_train_timesteps:
+E           IndexError: list index out of range
+
+src/diffusers/schedulers/scheduling_ddpm.py:303: IndexError
+=============================== warnings summary ===============================
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_lms_discrete.py:179: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_lms_discrete.py:330: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_heun_discrete.py:348: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_k_dpm_2_ancestral_discrete.py:308: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py: 2002 warnings
+tests/schedulers/test_scheduler_ddpm_parallel.py: 2002 warnings
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_k_dpm_2_ancestral_discrete.py:384: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    log_sigma = np.log(np.maximum(sigma, 1e-10))
+
+tests/schedulers/test_scheduler_ddpm.py: 4004 warnings
+tests/schedulers/test_scheduler_ddpm_parallel.py: 4004 warnings
+  /workspace/scratch/7789e3e03998/ramp-runtime/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:45: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    return conv.wrap(result, to_scalar=False)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_euler_ancestral_discrete.py:214: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_dpmsolver_sde.py:451: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_compatibles
+tests/schedulers/test_scheduler_ddpm_parallel.py::DDPMParallelSchedulerTest::test_compatibles
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_k_dpm_2_discrete.py:308: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    sigmas = np.array(((1 - self.alphas_cumprod) / self.alphas_cumprod) ** 0.5)
+
+tests/schedulers/test_scheduler_ddpm.py: 2002 warnings
+tests/schedulers/test_scheduler_ddpm_parallel.py: 2002 warnings
+  /workspace/scratch/306c018f6a72/verified-contribution/src/diffusers/schedulers/scheduling_k_dpm_2_discrete.py:427: DeprecationWarning: __array_wrap__ must accept context and return_scalar arguments (positionally) in the future. (Deprecated NumPy 2.0)
+    log_sigma = np.log(np.maximum(sigma, 1e-10))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /workspace/scratch/306c018f6a72/verified-contribution/.ramp/empty-timesteps/runs/20260923T085616040742Z/scheduler-tests.xml -
+=========================== short test summary info ============================
+FAILED tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps
+1 failed, 77 passed, 16030 warnings in 2.96s

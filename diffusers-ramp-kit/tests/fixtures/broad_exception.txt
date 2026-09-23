@@ -1,0 +1,6 @@
+# Deliberately bad negative fixture. Never use in the contribution.
+def ignore_invalid_input():
+    try:
+        validate_input()
+    except Exception:
+        pass

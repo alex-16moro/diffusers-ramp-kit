@@ -1,0 +1,41 @@
+[
+  {
+    "case": "context unapproved-sentinel.txt",
+    "status": "PASS",
+    "observed": "Context path is not approved: unapproved-sentinel.txt. Ask the profile owner to extend it."
+  },
+  {
+    "case": "context ../outside-sentinel.txt",
+    "status": "PASS",
+    "observed": "Context path is not approved: ../outside-sentinel.txt. Ask the profile owner to extend it."
+  },
+  {
+    "case": "out-of-scope patch",
+    "status": "PASS",
+    "findings": [
+      {
+        "rule": "SCOPE",
+        "path": "unapproved-sentinel.txt",
+        "message": "Change outside the task's editable paths."
+      }
+    ]
+  },
+  {
+    "case": "labelled anti-pattern fixture",
+    "status": "PASS",
+    "findings": [
+      {
+        "rule": "NO-SILENT-FALLBACK",
+        "path": "src/diffusers/schedulers/scheduling_ddpm.py",
+        "line": 677,
+        "message": "Broad exception swallowed. Validate the known input and raise a clear error.",
+        "source": ".ai/references/code_style.md"
+      }
+    ]
+  },
+  {
+    "case": "stale report after source edit",
+    "status": "PASS",
+    "observed": "STALE"
+  }
+]

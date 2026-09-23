@@ -1,0 +1,17 @@
+# Insert completed methods into DDPMSchedulerTest in the existing test module.
+# This is a scaffold, not a passing test suite. Choose assertions from the task's acceptance criteria.
+# Use the real scheduler via self.scheduler_classes[0](**self.get_scheduler_config()).
+# Follow assertRaisesRegex for the intended exception type and a stable message fragment.
+
+def test_empty_custom_timesteps(self):
+    raise NotImplementedError("Add the regression assertion for an empty custom list")
+
+def test_custom_timesteps_validation_preserves_valid_inputs(self):
+    raise NotImplementedError("Assert normal and single-element custom timestep values and CPU device")
+
+def test_count_based_inference_timesteps_unchanged(self):
+    raise NotImplementedError("Assert exact expected timestep values for a normal inference count")
+
+# Test both DDPMScheduler and DDPMParallelScheduler, following the real imports and constructors.
+# Cover the empty input and the existing argument-conflict precedence.
+# Map the existing mutual-exclusion test as additional evidence in task.json.

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "task_id": "empty-timesteps",
+  "phase": "baseline",
+  "level": "fast",
+  "run_id": "20260923T085610590938Z",
+  "fingerprint": "5eb6c8c51f828ed0713cd13ba2f3df24541cfa85be525b7bf3367b34cb649ffa",
+  "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
+  "kit_sha256": "b334e02c36417d19a6d41c20c08cc413425d3ae373c73fb8c82681dd4522186b",
+  "patch_sha256": "59cb0b7996424d8ba1d0e745e7c04a8617f94df6ac541f7dcb506514dbbf97d0",
+  "runtime": {
+    "python": "3.12.14",
+    "torch": "2.7.1+cpu",
+    "pytest": "8.3.5",
+    "ruff": "0.9.10",
+    "huggingface-hub": "1.32.0",
+    "safetensors": "0.8.0"
+  },
+  "findings": [],
+  "checks": [
+    {
+      "id": "regression",
+      "status": "FAIL",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml",
+        "/workspace/scratch/306c018f6a72/verified-contribution/.ramp/empty-timesteps/runs/20260923T085610590938Z/regression.xml",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
+      ],
+      "exit_code": 1,
+      "seconds": 5.003,
+      "log": ".ramp/empty-timesteps/runs/20260923T085610590938Z/regression.log",
+      "tests": [
+        {
+          "name": "test_empty_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "FAIL",
+          "detail": "IndexError: list index out of range\nself = <tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps>\n\n    def test_empty_custom_timesteps(self):\n        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):\n            scheduler = scheduler_class(**self.get_scheduler_config())\n            with self.assertRaisesRegex(ValueError, \"timesteps.*empty\"):\n>               scheduler.set_timesteps(timesteps=[])\n\ntests/schedulers/test_scheduler_ddpm.py:163: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n    def set_timesteps(\n        self,\n        num_inference_steps: int = None,\n        device: str | torch.device = None,\n        timesteps: list[int] | None = None,\n    ):\n        \"\"\"\n        Sets the discrete timesteps used for the diffusion chain (to be run before inference).\n    \n        Args:\n            num_inference_steps (`int`, *optional*):\n                The number of diffusion steps used when generating samples with a pre-trained model. If used,\n                `timesteps` must be `None`.\n            device (`str` or `torch.device`, *optional*):\n                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.\n            timesteps (`list[int]`, *optional*):\n                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default\n                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,\n                `num_inference_steps` must be `None`.\n    \n        \"\"\"\n        if num_inference_steps is not None and timesteps is not None:\n            raise ValueError(\"Can only pass one of `num_inference_steps` or `custom_timesteps`.\")\n    \n        if timesteps is not None:\n            for i in range(1, len(timesteps)):\n                if timesteps[i] >= timesteps[i - 1]:\n                    raise ValueError(\"`custom_timesteps` must be in descending order.\")\n    \n>           if timesteps[0] >= self.config.num_train_timesteps:\nE           IndexError: list index out of range\n\nsrc/diffusers/schedulers/scheduling_ddpm.py:303: IndexError"
+        }
+      ],
+      "counts": {
+        "PASS": 0,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIPPED": 0,
+        "total": 1
+      }
+    }
+  ],
+  "status": "EXPECTED_FAILURE",
+  "remote_ci": "NOT_RUN",
+  "human_review": "NOT_RUN",
+  "deployment": "NOT_RUN",
+  "counts": {
+    "PASS": 0,
+    "FAIL": 1,
+    "ERROR": 0,
+    "SKIPPED": 0,
+    "NOT_RUN": 0,
+    "checks": 1
+  },
+  "intended_failure_observed": true,
+  "test_sha256": "6dd01ea361d93c6af83dff24966186f6c6a2c3757e6548927a6da73f9e2fd138",
+  "task_sha256": "654bb9fee8292411edd697f401ec024eb476e9ead6a67ab00c6dbb0818afb746",
+  "next_action": "Implement the scoped fix, then run candidate verification."
+}

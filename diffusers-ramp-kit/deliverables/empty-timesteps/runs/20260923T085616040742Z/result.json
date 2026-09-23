@@ -1,0 +1,742 @@
+{
+  "schema_version": 1,
+  "task_id": "empty-timesteps",
+  "phase": "candidate",
+  "level": "full",
+  "run_id": "20260923T085616040742Z",
+  "fingerprint": "0a7a81255e5d61987e5fb9022840952a8fa7189507d88ff50d351396bf8fc561",
+  "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
+  "kit_sha256": "b334e02c36417d19a6d41c20c08cc413425d3ae373c73fb8c82681dd4522186b",
+  "patch_sha256": "59cb0b7996424d8ba1d0e745e7c04a8617f94df6ac541f7dcb506514dbbf97d0",
+  "runtime": {
+    "python": "3.12.14",
+    "torch": "2.7.1+cpu",
+    "pytest": "8.3.5",
+    "ruff": "0.9.10",
+    "huggingface-hub": "1.32.0",
+    "safetensors": "0.8.0"
+  },
+  "findings": [
+    {
+      "rule": "STALE",
+      "message": "Inputs changed during verification; rerun on a stable patch."
+    }
+  ],
+  "checks": [
+    {
+      "id": "acceptance",
+      "status": "FAIL",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml",
+        "/workspace/scratch/306c018f6a72/verified-contribution/.ramp/empty-timesteps/runs/20260923T085616040742Z/acceptance.xml",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_custom_timesteps_validation_preserves_valid_inputs",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_custom_timesteps_passing_both_num_inference_steps_and_timesteps",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_count_based_inference_timesteps_unchanged"
+      ],
+      "exit_code": 1,
+      "seconds": 4.681,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/acceptance.log",
+      "tests": [
+        {
+          "name": "test_empty_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "FAIL",
+          "detail": "IndexError: list index out of range\nself = <tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps>\n\n    def test_empty_custom_timesteps(self):\n        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):\n            scheduler = scheduler_class(**self.get_scheduler_config())\n            with self.assertRaisesRegex(ValueError, \"timesteps.*empty\"):\n>               scheduler.set_timesteps(timesteps=[])\n\ntests/schedulers/test_scheduler_ddpm.py:163: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n    def set_timesteps(\n        self,\n        num_inference_steps: int = None,\n        device: str | torch.device = None,\n        timesteps: list[int] | None = None,\n    ):\n        \"\"\"\n        Sets the discrete timesteps used for the diffusion chain (to be run before inference).\n    \n        Args:\n            num_inference_steps (`int`, *optional*):\n                The number of diffusion steps used when generating samples with a pre-trained model. If used,\n                `timesteps` must be `None`.\n            device (`str` or `torch.device`, *optional*):\n                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.\n            timesteps (`list[int]`, *optional*):\n                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default\n                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,\n                `num_inference_steps` must be `None`.\n    \n        \"\"\"\n        if num_inference_steps is not None and timesteps is not None:\n            raise ValueError(\"Can only pass one of `num_inference_steps` or `custom_timesteps`.\")\n    \n        if timesteps is not None:\n            for i in range(1, len(timesteps)):\n                if timesteps[i] >= timesteps[i - 1]:\n                    raise ValueError(\"`custom_timesteps` must be in descending order.\")\n    \n>           if timesteps[0] >= self.config.num_train_timesteps:\nE           IndexError: list index out of range\n\nsrc/diffusers/schedulers/scheduling_ddpm.py:303: IndexError"
+        },
+        {
+          "name": "test_custom_timesteps_validation_preserves_valid_inputs",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_passing_both_num_inference_steps_and_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_count_based_inference_timesteps_unchanged",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        }
+      ],
+      "counts": {
+        "PASS": 3,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIPPED": 0,
+        "total": 4
+      }
+    },
+    {
+      "id": "scheduler-tests",
+      "status": "FAIL",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml",
+        "/workspace/scratch/306c018f6a72/verified-contribution/.ramp/empty-timesteps/runs/20260923T085616040742Z/scheduler-tests.xml",
+        "tests/schedulers/test_scheduler_ddpm.py",
+        "tests/schedulers/test_scheduler_ddpm_parallel.py"
+      ],
+      "exit_code": 1,
+      "seconds": 6.48,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/scheduler-tests.log",
+      "tests": [
+        {
+          "name": "test_add_noise_device",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_compatibles",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_deprecated_kwargs",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_save_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_getattr_is_correct",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_outputs_equivalence",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_public_api",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_step_shape",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_trained_betas",
+          "class": "tests.schedulers.test_scheduler_ddpm.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_add_noise_device",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_betas",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_clip_sample",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_compatibles",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_count_based_inference_timesteps_unchanged",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_increasing_order",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_passing_both_num_inference_steps_and_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_too_large",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_validation_preserves_valid_inputs",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_deprecated_kwargs",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_empty_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "FAIL",
+          "detail": "IndexError: list index out of range\nself = <tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps>\n\n    def test_empty_custom_timesteps(self):\n        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):\n            scheduler = scheduler_class(**self.get_scheduler_config())\n            with self.assertRaisesRegex(ValueError, \"timesteps.*empty\"):\n>               scheduler.set_timesteps(timesteps=[])\n\ntests/schedulers/test_scheduler_ddpm.py:163: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n    def set_timesteps(\n        self,\n        num_inference_steps: int = None,\n        device: str | torch.device = None,\n        timesteps: list[int] | None = None,\n    ):\n        \"\"\"\n        Sets the discrete timesteps used for the diffusion chain (to be run before inference).\n    \n        Args:\n            num_inference_steps (`int`, *optional*):\n                The number of diffusion steps used when generating samples with a pre-trained model. If used,\n                `timesteps` must be `None`.\n            device (`str` or `torch.device`, *optional*):\n                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.\n            timesteps (`list[int]`, *optional*):\n                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default\n                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,\n                `num_inference_steps` must be `None`.\n    \n        \"\"\"\n        if num_inference_steps is not None and timesteps is not None:\n            raise ValueError(\"Can only pass one of `num_inference_steps` or `custom_timesteps`.\")\n    \n        if timesteps is not None:\n            for i in range(1, len(timesteps)):\n                if timesteps[i] >= timesteps[i - 1]:\n                    raise ValueError(\"`custom_timesteps` must be in descending order.\")\n    \n>           if timesteps[0] >= self.config.num_train_timesteps:\nE           IndexError: list index out of range\n\nsrc/diffusers/schedulers/scheduling_ddpm.py:303: IndexError"
+        },
+        {
+          "name": "test_from_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_save_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_full_loop_no_noise",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_full_loop_with_noise",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_full_loop_with_v_prediction",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_getattr_is_correct",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_prediction_type",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_rescale_betas_zero_snr",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_outputs_equivalence",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_public_api",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_schedules",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_step_shape",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_thresholding",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_time_indices",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_trained_betas",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_variance",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_variance_type",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_add_noise_device",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_compatibles",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_deprecated_kwargs",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_save_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_getattr_is_correct",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_outputs_equivalence",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_public_api",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_step_shape",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_trained_betas",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.SchedulerCommonTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_add_noise_device",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_batch_step_no_noise",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_betas",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_clip_sample",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_compatibles",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_increasing_order",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_passing_both_num_inference_steps_and_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_custom_timesteps_too_large",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_deprecated_kwargs",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_from_save_pretrained",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_full_loop_no_noise",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_full_loop_with_noise",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_full_loop_with_v_prediction",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_getattr_is_correct",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_prediction_type",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_rescale_betas_zero_snr",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_outputs_equivalence",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_scheduler_public_api",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_schedules",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_step_shape",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_thresholding",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_time_indices",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_trained_betas",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_variance",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        },
+        {
+          "name": "test_variance_type",
+          "class": "tests.schedulers.test_scheduler_ddpm_parallel.DDPMParallelSchedulerTest",
+          "status": "PASS",
+          "detail": ""
+        }
+      ],
+      "counts": {
+        "PASS": 77,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIPPED": 0,
+        "total": 78
+      }
+    },
+    {
+      "id": "lint",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "src/diffusers/schedulers/scheduling_ddpm.py",
+        "src/diffusers/schedulers/scheduling_ddpm_parallel.py",
+        "tests/schedulers/test_scheduler_ddpm.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.026,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/lint.log"
+    },
+    {
+      "id": "format",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "src/diffusers/schedulers/scheduling_ddpm.py",
+        "src/diffusers/schedulers/scheduling_ddpm_parallel.py",
+        "tests/schedulers/test_scheduler_ddpm.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.027,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/format.log"
+    },
+    {
+      "id": "upstream-quality",
+      "status": "PASS",
+      "command": [
+        "make",
+        "quality"
+      ],
+      "exit_code": 0,
+      "seconds": 6.644,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/upstream-quality.log"
+    },
+    {
+      "id": "copies",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "utils/check_copies.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.469,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/copies.log"
+    },
+    {
+      "id": "dummies",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "utils/check_dummies.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.024,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/dummies.log"
+    },
+    {
+      "id": "support-list",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "utils/check_support_list.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.02,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/support-list.log"
+    },
+    {
+      "id": "forward-docstrings",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "utils/check_forward_call_docstrings.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.951,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/forward-docstrings.log"
+    },
+    {
+      "id": "dependency-table",
+      "status": "PASS",
+      "command": [
+        "make",
+        "deps_table_check_updated"
+      ],
+      "exit_code": 0,
+      "seconds": 0.183,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/dependency-table.log",
+      "working_directory": "Disposable candidate snapshot (removed after check)"
+    },
+    {
+      "id": "dependencies",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/others/test_dependencies.py"
+      ],
+      "exit_code": 0,
+      "seconds": 4.901,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/dependencies.log"
+    },
+    {
+      "id": "test-strength",
+      "status": "FAIL",
+      "command": [
+        "/workspace/scratch/7789e3e03998/ramp-runtime/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml",
+        "/tmp/ramp-strength-ovat0nsr/checkout/.ramp-replay/regression.xml",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
+      ],
+      "exit_code": 1,
+      "seconds": 4.825,
+      "log": ".ramp/empty-timesteps/runs/20260923T085616040742Z/test-strength.log",
+      "tests": [
+        {
+          "name": "test_empty_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "FAIL",
+          "detail": "IndexError: list index out of range\nself = <tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps>\n\n    def test_empty_custom_timesteps(self):\n        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):\n            scheduler = scheduler_class(**self.get_scheduler_config())\n            with self.assertRaisesRegex(ValueError, \"timesteps.*empty\"):\n>               scheduler.set_timesteps(timesteps=[])\n\ntests/schedulers/test_scheduler_ddpm.py:163: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n    def set_timesteps(\n        self,\n        num_inference_steps: int = None,\n        device: str | torch.device = None,\n        timesteps: list[int] | None = None,\n    ):\n        \"\"\"\n        Sets the discrete timesteps used for the diffusion chain (to be run before inference).\n    \n        Args:\n            num_inference_steps (`int`, *optional*):\n                The number of diffusion steps used when generating samples with a pre-trained model. If used,\n                `timesteps` must be `None`.\n            device (`str` or `torch.device`, *optional*):\n                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.\n            timesteps (`list[int]`, *optional*):\n                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default\n                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,\n                `num_inference_steps` must be `None`.\n    \n        \"\"\"\n        if num_inference_steps is not None and timesteps is not None:\n            raise ValueError(\"Can only pass one of `num_inference_steps` or `custom_timesteps`.\")\n    \n        if timesteps is not None:\n            for i in range(1, len(timesteps)):\n                if timesteps[i] >= timesteps[i - 1]:\n                    raise ValueError(\"`custom_timesteps` must be in descending order.\")\n    \n>           if timesteps[0] >= self.config.num_train_timesteps:\nE           IndexError: list index out of range\n\nsrc/diffusers/schedulers/scheduling_ddpm.py:303: IndexError"
+        }
+      ],
+      "counts": {
+        "PASS": 0,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIPPED": 0,
+        "total": 1
+      },
+      "working_directory": "Disposable pinned snapshot (removed after check)",
+      "expected_failure_observed": true,
+      "method": "Restore pinned implementation with the candidate regression test in a disposable snapshot.",
+      "implementation_changed": false,
+      "error": "No implementation change to remove; test-strength evidence is incomplete."
+    }
+  ],
+  "status": "FAIL",
+  "remote_ci": "NOT_RUN",
+  "human_review": "NOT_RUN",
+  "deployment": "NOT_RUN",
+  "counts": {
+    "PASS": 9,
+    "FAIL": 3,
+    "ERROR": 0,
+    "SKIPPED": 0,
+    "NOT_RUN": 0,
+    "checks": 12
+  },
+  "next_action": "Resolve findings and failed checks; rerun verification."
+}

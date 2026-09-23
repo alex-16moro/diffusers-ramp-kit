@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.436" timestamp="2026-09-23T10:58:30.494995+02:00" hostname="4ca6c7d0f6ad"><testcase classname="tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest" name="test_empty_custom_timesteps" time="0.002"><failure message="IndexError: list index out of range">self = &lt;tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps&gt;
+
+    def test_empty_custom_timesteps(self):
+        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):
+            scheduler = scheduler_class(**self.get_scheduler_config())
+            with self.assertRaisesRegex(ValueError, "timesteps.*empty"):
+&gt;               scheduler.set_timesteps(timesteps=[])
+
+tests/schedulers/test_scheduler_ddpm.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def set_timesteps(
+        self,
+        num_inference_steps: int = None,
+        device: str | torch.device = None,
+        timesteps: list[int] | None = None,
+    ):
+        """
+        Sets the discrete timesteps used for the diffusion chain (to be run before inference).
+    
+        Args:
+            num_inference_steps (`int`, *optional*):
+                The number of diffusion steps used when generating samples with a pre-trained model. If used,
+                `timesteps` must be `None`.
+            device (`str` or `torch.device`, *optional*):
+                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.
+            timesteps (`list[int]`, *optional*):
+                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default
+                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,
+                `num_inference_steps` must be `None`.
+    
+        """
+        if num_inference_steps is not None and timesteps is not None:
+            raise ValueError("Can only pass one of `num_inference_steps` or `custom_timesteps`.")
+    
+        if timesteps is not None:
+            for i in range(1, len(timesteps)):
+                if timesteps[i] &gt;= timesteps[i - 1]:
+                    raise ValueError("`custom_timesteps` must be in descending order.")
+    
+&gt;           if timesteps[0] &gt;= self.config.num_train_timesteps:
+E           IndexError: list index out of range
+
+src/diffusers/schedulers/scheduling_ddpm.py:303: IndexError</failure></testcase></testsuite></testsuites>

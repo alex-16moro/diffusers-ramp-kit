@@ -1,0 +1,15 @@
+running deps_table_update
+updating src/diffusers/dependency_versions_table.py
+/workspace/scratch/7789e3e03998/ramp-runtime/lib/python3.12/site-packages/setuptools/dist.py:759: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: Apache Software License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  self._finalize_license_expression()

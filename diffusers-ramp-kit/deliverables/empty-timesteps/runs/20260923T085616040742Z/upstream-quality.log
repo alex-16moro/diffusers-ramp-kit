@@ -1,0 +1,7 @@
+ruff check examples scripts src tests utils benchmarks setup.py
+All checks passed!
+ruff format --check examples scripts src tests utils benchmarks setup.py
+2086 files already formatted
+doc-builder style src/diffusers docs/source --max_len 119 --check_only
+python utils/check_doc_toc.py
+python utils/check_ai.py
