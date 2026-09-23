@@ -244,6 +244,38 @@ class WorkflowTests(unittest.TestCase):
             self.assertFalse((destination / "completed.patch").exists())
             self.assertFalse((destination / ".ramp").exists())
             self.assertTrue((destination / ".cursor/rules/ramp-entry.mdc").exists())
+            for excluded in ("tests", "deliverables", "historical", "review-checks"):
+                self.assertFalse((destination / ".ramp-kit" / excluded).exists())
+            self.assertEqual(core.git(destination, "branch", "--show-current").decode().strip(), "ramp-base")
+            self.assertIn("separate host", result["next_action"])
+
+    def test_onboarding_permission_error_has_actionable_destination(self):
+        failed = subprocess.CompletedProcess(
+            [], 128, "", "fatal: could not create work tree: Permission denied"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = Path(tmp) / "uncreated"
+            with (
+                patch.object(core, "git", return_value=b""),
+                patch("rampkit.cli.subprocess.run", return_value=failed),
+            ):
+                with self.assertRaisesRegex(
+                    core.RampError, "ONBOARD_CREATE_FAILED.*not writable.*--dest"
+                ) as caught:
+                    onboard(self.repo, destination)
+            self.assertIn(str(Path.cwd() / "ramp-base-checkout"), str(caught.exception))
+            self.assertFalse(destination.exists())
+
+    def test_onboarding_os_error_is_explained(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                patch.object(core, "git", return_value=b""),
+                patch("rampkit.cli.subprocess.run", side_effect=PermissionError("denied")),
+            ):
+                with self.assertRaisesRegex(
+                    core.RampError, "ONBOARD_CREATE_FAILED.*no alternative destination"
+                ):
+                    onboard(self.repo, Path(tmp) / "uncreated")
 
     def test_regression_trace_must_reach_implementation(self):
         check = {
@@ -298,11 +330,25 @@ class WorkflowTests(unittest.TestCase):
         task["criteria"].append(
             {"id": "AC2", "text": "Second", "tests": [self.tests + "::OtherTests::test_second"]}
         )
-        scaffold = core.test_scaffold(task)
+        scaffold = core.test_scaffold(self.repo, task)
         self.assertIn("class OtherTests:", scaffold)
         self.assertIn("def test_second(self):", scaffold)
         self.assertNotIn("DDPM", scaffold)
         self.assertIn("NotImplementedError", scaffold)
+
+    def test_scaffold_preserves_existing_mapped_method(self):
+        original = "class Tests:\n    def test_empty(self):\n        self.assertEqual(actual, 1)\n"
+        (self.repo / self.tests).write_text(original)
+        scaffold = core.test_scaffold(self.repo, self.task)
+        self.assertIn("# EXISTS — mapped as evidence, do not modify: test_empty", scaffold)
+        self.assertNotIn("def test_empty", scaffold)
+        self.assertNotIn("NotImplementedError", scaffold)
+        self.assertEqual((self.repo / self.tests).read_text(), original)
+
+    def test_scaffold_refuses_to_guess_when_test_file_is_invalid(self):
+        (self.repo / self.tests).write_text("class Tests(")
+        with self.assertRaisesRegex(core.RampError, "Cannot inspect mapped test file"):
+            core.test_scaffold(self.repo, self.task)
 
     def test_empty_and_raise_only_mapped_tests_are_rejected(self):
         fixture = Path(__file__).parent / "fixtures/no_assertions.txt"
@@ -326,6 +372,31 @@ class WorkflowTests(unittest.TestCase):
             )
             self.assertEqual(core.assertion_findings(self.repo, self.task), [])
 
+    def test_constant_only_assertions_cannot_reach_ready(self):
+        fixture = Path(__file__).parent / "fixtures/constant_assertions.txt"
+        bodies = [
+            "assert True",
+            "assert 1 == 1",
+            "self.assertEqual(1, 1)",
+            "self.assertTrue(True, message)",
+            "self.assertTrue(True, msg=message)",
+            "self.assertEqual([1, 2], [1, 2], msg=message)",
+        ]
+        sources = [fixture.read_text()] + [
+            "class Tests:\n    def test_empty(self):\n        " + body + "\n" for body in bodies
+        ]
+        for source in sources:
+            with self.subTest(source=source):
+                (self.repo / self.tests).write_text(source)
+                self.assertTrue(core.assertion_findings(self.repo, self.task))
+                with (
+                    patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+                    patch.object(core, "pytest_check") as check,
+                ):
+                    result = core.verify(self.repo, "task", "full", "candidate")
+                self.assertEqual(result["status"], "FAIL")
+                check.assert_not_called()
+
     def test_assertion_free_candidate_cannot_reach_ready(self):
         (self.repo / self.tests).write_text("class Tests:\n    def test_empty(self):\n        pass\n")
         with (
@@ -347,7 +418,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(before, core.patch_bytes(self.repo, self.task))
 
     def test_baseline_failure_reasons_and_exit_contract(self):
-        (self.repo / self.tests).write_text("class Tests:\n    def test_empty(self):\n        assert True\n")
+        (self.repo / self.tests).write_text(
+            "class Tests:\n    def test_empty(self):\n        self.assertEqual(self.scheduler.step(), 1)\n"
+        )
         cases = [
             ("PASS", 0, "", "observed PASS", "FAIL"),
             ("SKIPPED", 0, "", "observed SKIPPED", "FAIL"),
@@ -377,7 +450,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(code, 1)
 
     def test_replay_does_not_overwrite_preimplementation_record(self):
-        (self.repo / self.tests).write_text("class Tests:\n    def test_empty(self):\n        assert True\n")
+        (self.repo / self.tests).write_text(
+            "class Tests:\n    def test_empty(self):\n        self.assertEqual(self.scheduler.step(), 1)\n"
+        )
         baseline = {"status": "EXPECTED_FAILURE", "origin": "pre-implementation sentinel"}
         core.write(self.directory / "baseline.json", baseline)
         result = {"id": "test-strength", "status": "PASS"}
@@ -400,6 +475,8 @@ class WorkflowTests(unittest.TestCase):
         pr = (self.directory / "PR-DRAFT.md").read_text()
         self.assertIn("Required full checks: 5; executed in candidate: 0", report)
         self.assertIn("Only fork CI enforces policy integrity.", report)
+        self.assertIn("Installation digest:", report)
+        self.assertNotIn("Released/installation", report)
         self.assertIn("Pre-implementation baseline: NOT_RUN", report)
         self.assertIn("No steps", pr)
         self.assertIn("Public scheduler.", pr)

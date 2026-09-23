@@ -10,7 +10,7 @@
     "safetensors": "0.8.0"
   },
   "findings": [],
-  "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+  "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
   "limitations": [
     "Whole-agent OS/network isolation is not enforced by this kit.",
     "Architectural fit is an agent judgement requiring human review."

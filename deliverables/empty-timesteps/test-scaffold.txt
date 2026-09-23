@@ -11,9 +11,8 @@ class DDPMSchedulerTest:
         # Acceptance: AC2
         raise NotImplementedError("Write the mapped behavioural assertions")
 
-    def test_custom_timesteps_passing_both_num_inference_steps_and_timesteps(self):
-        # Acceptance: AC3
-        raise NotImplementedError("Write the mapped behavioural assertions")
+    # EXISTS — mapped as evidence, do not modify: test_custom_timesteps_passing_both_num_inference_steps_and_timesteps
+    # Acceptance: AC3
 
     def test_count_based_inference_timesteps_unchanged(self):
         # Acceptance: AC4

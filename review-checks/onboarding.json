@@ -1,11 +1,11 @@
 {
   "status": "ONBOARDING_READY",
-  "checkout": "/workspace/scratch/306c018f6a72/review-integration-final",
+  "checkout": "/workspace/scratch/306c018f6a72/rereview-integration",
   "attachment": {
     "status": "ATTACHED",
-    "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+    "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
     "files_added": 21,
     "next_action": "Open this checkout in a fresh Cursor session and describe the task."
   },
-  "next_action": "Bootstrap dependencies, then open ONLY this checkout in a fresh Cursor session. Do not add the kit bundle or completed examples to that workspace."
+  "next_action": "Platform owner: review and commit the installation on ramp-base, then publish it to the approved fork following RELEASE.md. The engineer clones only ramp-base on a separate host without the kit repository or solution evidence, bootstraps, and opens that clone in Cursor (START_HERE.md)."
 }

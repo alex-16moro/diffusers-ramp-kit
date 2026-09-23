@@ -3,14 +3,14 @@
   "task_id": "empty-timesteps",
   "phase": "baseline",
   "level": "fast",
-  "run_id": "20260923T100741348166Z",
-  "fingerprint": "bef0f4d3e3a73e34a2e23e652effa821c79ab3cb48338ba392dc77a39d7b15bb",
+  "run_id": "20260923T113012350472Z",
+  "fingerprint": "690e23b93c44c9aedd6fb3cca0236f81f678abc82759c73d6eab9c87e752815a",
   "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
-  "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+  "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
   "patch_sha256": "57b5bbe549932f12a02ab894e75da8eb9033b02e8e8e4d85799f21a929ee315c",
   "policy": {
-    "runner_kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
-    "released_kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+    "runner_kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
+    "installation_kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
     "reference_source": "attachment.json at installation; locally editable, not an independent trust anchor",
     "full_required_checks": [
       "acceptance",
@@ -45,19 +45,19 @@
       "id": "regression",
       "status": "FAIL",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "pytest",
         "-q",
         "-o",
         "addopts=",
         "--junitxml",
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp/empty-timesteps/runs/20260923T100741348166Z/regression.xml",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp/empty-timesteps/runs/20260923T113012350472Z/regression.xml",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
       ],
       "exit_code": 1,
-      "seconds": 5.302,
-      "log": ".ramp/empty-timesteps/runs/20260923T100741348166Z/regression.log",
+      "seconds": 4.913,
+      "log": ".ramp/empty-timesteps/runs/20260923T113012350472Z/regression.log",
       "tests": [
         {
           "name": "test_empty_custom_timesteps",

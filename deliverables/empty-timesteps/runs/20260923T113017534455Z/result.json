@@ -3,14 +3,14 @@
   "task_id": "empty-timesteps",
   "phase": "candidate",
   "level": "full",
-  "run_id": "20260923T100822420118Z",
-  "fingerprint": "02beec015033d330f04a97d0fe56f924e1dc040f0e6c925b98f6a053745a3156",
+  "run_id": "20260923T113017534455Z",
+  "fingerprint": "d26c02d48fb16322b9cb6a476d0762021b89cfbd3d6edf484491b409dd2d8e3b",
   "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
-  "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+  "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
   "patch_sha256": "5380733056ba1589e9cfebe911013967d661c8c25102c4443833847587462995",
   "policy": {
-    "runner_kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
-    "released_kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+    "runner_kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
+    "installation_kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
     "reference_source": "attachment.json at installation; locally editable, not an independent trust anchor",
     "full_required_checks": [
       "acceptance",
@@ -56,22 +56,22 @@
       "id": "acceptance",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "pytest",
         "-q",
         "-o",
         "addopts=",
         "--junitxml",
-        "/workspace/scratch/306c018f6a72/review-integration-final-candidate/.ramp/empty-timesteps/runs/20260923T100822420118Z/acceptance.xml",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp/empty-timesteps/runs/20260923T113017534455Z/acceptance.xml",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_custom_timesteps_validation_preserves_valid_inputs",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_custom_timesteps_passing_both_num_inference_steps_and_timesteps",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_count_based_inference_timesteps_unchanged"
       ],
       "exit_code": 0,
-      "seconds": 4.643,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/acceptance.log",
+      "seconds": 4.736,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/acceptance.log",
       "tests": [
         {
           "name": "test_empty_custom_timesteps",
@@ -110,20 +110,20 @@
       "id": "scheduler-tests",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "pytest",
         "-q",
         "-o",
         "addopts=",
         "--junitxml",
-        "/workspace/scratch/306c018f6a72/review-integration-final-candidate/.ramp/empty-timesteps/runs/20260923T100822420118Z/scheduler-tests.xml",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp/empty-timesteps/runs/20260923T113017534455Z/scheduler-tests.xml",
         "tests/schedulers/test_scheduler_ddpm.py",
         "tests/schedulers/test_scheduler_ddpm_parallel.py"
       ],
       "exit_code": 0,
-      "seconds": 6.433,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/scheduler-tests.log",
+      "seconds": 6.703,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/scheduler-tests.log",
       "tests": [
         {
           "name": "test_add_noise_device",
@@ -606,7 +606,7 @@
       "id": "lint",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "ruff",
         "check",
@@ -615,14 +615,14 @@
         "tests/schedulers/test_scheduler_ddpm.py"
       ],
       "exit_code": 0,
-      "seconds": 0.025,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/lint.log"
+      "seconds": 0.027,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/lint.log"
     },
     {
       "id": "format",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "ruff",
         "format",
@@ -632,8 +632,8 @@
         "tests/schedulers/test_scheduler_ddpm.py"
       ],
       "exit_code": 0,
-      "seconds": 0.034,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/format.log"
+      "seconds": 0.023,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/format.log"
     },
     {
       "id": "upstream-quality",
@@ -643,52 +643,52 @@
         "quality"
       ],
       "exit_code": 0,
-      "seconds": 6.356,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/upstream-quality.log"
+      "seconds": 6.673,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/upstream-quality.log"
     },
     {
       "id": "copies",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "utils/check_copies.py"
       ],
       "exit_code": 0,
-      "seconds": 1.435,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/copies.log"
+      "seconds": 1.346,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/copies.log"
     },
     {
       "id": "dummies",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "utils/check_dummies.py"
       ],
       "exit_code": 0,
-      "seconds": 0.033,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/dummies.log"
+      "seconds": 0.024,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/dummies.log"
     },
     {
       "id": "support-list",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "utils/check_support_list.py"
       ],
       "exit_code": 0,
-      "seconds": 0.022,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/support-list.log"
+      "seconds": 0.019,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/support-list.log"
     },
     {
       "id": "forward-docstrings",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "utils/check_forward_call_docstrings.py"
       ],
       "exit_code": 0,
-      "seconds": 2.999,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/forward-docstrings.log"
+      "seconds": 2.88,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/forward-docstrings.log"
     },
     {
       "id": "dependency-table",
@@ -698,41 +698,41 @@
         "deps_table_check_updated"
       ],
       "exit_code": 0,
-      "seconds": 0.138,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/dependency-table.log",
+      "seconds": 0.151,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/dependency-table.log",
       "working_directory": "Disposable candidate snapshot (removed after check)"
     },
     {
       "id": "dependencies",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "pytest",
         "-q",
         "tests/others/test_dependencies.py"
       ],
       "exit_code": 0,
-      "seconds": 4.724,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/dependencies.log"
+      "seconds": 4.54,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/dependencies.log"
     },
     {
       "id": "test-strength",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
         "-m",
         "pytest",
         "-q",
         "-o",
         "addopts=",
         "--junitxml",
-        "/tmp/ramp-strength-5_iacgcd/checkout/.ramp-replay/regression.xml",
+        "/tmp/ramp-strength-f_tlzin5/checkout/.ramp-replay/regression.xml",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
       ],
       "exit_code": 1,
-      "seconds": 5.0,
-      "log": ".ramp/empty-timesteps/runs/20260923T100822420118Z/test-strength.log",
+      "seconds": 4.717,
+      "log": ".ramp/empty-timesteps/runs/20260923T113017534455Z/test-strength.log",
       "tests": [
         {
           "name": "test_empty_custom_timesteps",

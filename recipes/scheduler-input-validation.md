@@ -14,7 +14,7 @@ Explain that silently choosing a list changes the caller's requested behaviour, 
 
 All commands run from the Diffusers checkout with `.ramp-venv` active. Read `.ai/AGENTS.md`; upstream coding/review instructions still apply. Setup is already supplied by the kit: do not create another environment or install/update skills. Inspect local skills only; registry listing may require network access.
 
-Before `prepare`, the agent writes `.ramp/specs/empty-timesteps.json` from the actual request and inspected code. Use `examples/empty-timesteps.json` only as a schema guide; do not blindly load its prewritten request or criteria. Validate request, scope, regression exception, and criterion-to-test mappings. The engineer does not need to author JSON. Keep draft specs outside `.ramp/<task>/`, which `prepare` creates.
+Before `prepare`, the agent writes `.ramp/specs/empty-timesteps.json` from the actual request and inspected code. Use `.ramp-kit/examples/empty-timesteps.json` only as a schema guide; do not blindly load its prewritten request or criteria. Validate request, scope, regression exception, and criterion-to-test mappings. The engineer does not need to author JSON. Keep draft specs outside `.ramp/<task>/`, which `prepare` creates.
 
 ```bash
 python .ramp-kit/run.py --repo . doctor
@@ -29,7 +29,7 @@ For a different supported validation task, prepare a separate spec modeled on th
 Record architectural assessment with `assess empty-timesteps --decision REVISE --rationale "..." --source .ai/references/code_style.md --alternative "..."`.
 When the plan fits, record `COMPATIBLE` with its evidence. The history retains earlier pushback. It is agent judgement, not human approval.
 
-The scaffold appears under `.ramp/empty-timesteps/test-scaffold.txt`. Its class and method stubs come from the task mappings. Merge missing methods into the mapped existing test class; do not duplicate methods already present. Replace every stub with meaningful assertions. A raise-only stub does not satisfy the assertion check. The task record maps acceptance criteria to those methods. Keep the test file unchanged between the baseline and candidate runs.
+The scaffold appears under `.ramp/empty-timesteps/test-scaffold.txt`. It parses the mapped test files and marks existing methods `EXISTS — mapped as evidence, do not modify`. Only missing mapped methods become stubs; merge these into the existing class and preserve the marked upstream methods. Replace every stub with meaningful assertions. Raise-only stubs and literal-only assertions such as `self.assertTrue(True)` do not satisfy the assertion check. The task record maps acceptance criteria to those methods. Keep the test file unchanged between the baseline and candidate runs.
 
 ```bash
 python .ramp-kit/run.py --repo . verify empty-timesteps --phase baseline

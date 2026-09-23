@@ -1,6 +1,6 @@
 running deps_table_update
 updating src/diffusers/dependency_versions_table.py
-/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/lib/python3.12/site-packages/setuptools/dist.py:759: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/lib/python3.12/site-packages/setuptools/dist.py:759: SetuptoolsDeprecationWarning: License classifiers are deprecated.
 !!
 
         ********************************************************************************

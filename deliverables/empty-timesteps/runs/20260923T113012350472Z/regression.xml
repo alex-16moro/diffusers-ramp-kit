@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.237" timestamp="2026-09-23T12:08:18.328743+02:00" hostname="4ca6c7d0f6ad"><testcase classname="tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest" name="test_empty_custom_timesteps" time="0.002"><failure message="IndexError: list index out of range">self = &lt;tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps&gt;
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.324" timestamp="2026-09-23T13:30:15.085104+02:00" hostname="4ca6c7d0f6ad"><testcase classname="tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest" name="test_empty_custom_timesteps" time="0.002"><failure message="IndexError: list index out of range">self = &lt;tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps&gt;
 
     def test_empty_custom_timesteps(self):
         for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):

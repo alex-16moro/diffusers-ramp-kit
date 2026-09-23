@@ -124,7 +124,7 @@ def render(repo: Path, task_id: str) -> dict:
         "## DevOps — delivery handoff",
         f"- Upstream base: `{task['base_sha']}`",
         f"- Current runner kit digest: `{policy['runner_kit_sha256']}`",
-        f"- Released/installation reference digest: `{policy['released_kit_sha256']}`",
+        f"- Installation digest: `{policy['installation_kit_sha256']}`",
         f"- Reference source: {policy['reference_source']}",
         f"- Required full checks: {len(policy['full_required_checks'])}; executed in candidate: {len(checks)}.",
         "- Only fork CI enforces policy integrity. Its base policy and workflow require maintainer protection.",

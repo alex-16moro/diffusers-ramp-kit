@@ -3,18 +3,18 @@
     "name": "cold-bootstrap",
     "command": [
       "bash",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/runtime/bootstrap.sh",
-      "/workspace/scratch/306c018f6a72/review-integration-final"
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/runtime/bootstrap.sh",
+      "/workspace/scratch/306c018f6a72/rereview-integration"
     ],
     "exit_code": 0
   },
   {
     "name": "doctor",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
       "doctor"
     ],
     "exit_code": 0
@@ -55,43 +55,57 @@
     "command": [
       "git",
       "clone",
-      "--no-hardlinks",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
-      "/workspace/scratch/306c018f6a72/review-integration-final-policy"
+      "--no-local",
+      "--single-branch",
+      "--branch",
+      "ramp-base",
+      "--no-tags",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/workspace/scratch/306c018f6a72/rereview-integration-policy"
     ],
     "exit_code": 0
   },
   {
     "name": "fresh-clone-doctor",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final-policy/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration-policy/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final-policy",
+      "/workspace/scratch/306c018f6a72/rereview-integration-policy",
       "doctor"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "contribution-branch",
+    "command": [
+      "git",
+      "switch",
+      "-c",
+      "ramp/fixture-contribution"
     ],
     "exit_code": 0
   },
   {
     "name": "prepare",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
       "prepare",
       "--spec",
-      "/workspace/scratch/306c018f6a72/ramp-kit-review/diffusers-ramp-kit/examples/empty-timesteps.json"
+      "/workspace/scratch/306c018f6a72/ramp-kit-rereview/examples/empty-timesteps.json"
     ],
     "exit_code": 0
   },
   {
     "name": "assess",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
       "assess",
       "empty-timesteps",
       "--decision",
@@ -113,17 +127,17 @@
       "git",
       "apply",
       "--include=tests/schedulers/test_scheduler_ddpm.py",
-      "/workspace/scratch/306c018f6a72/ramp-kit-review/diffusers-ramp-kit/tests/fixtures/contribution.patch"
+      "/workspace/scratch/306c018f6a72/ramp-kit-rereview/tests/fixtures/contribution.patch"
     ],
     "exit_code": 0
   },
   {
     "name": "baseline",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
       "verify",
       "empty-timesteps",
       "--phase",
@@ -137,17 +151,17 @@
       "git",
       "apply",
       "--exclude=tests/schedulers/test_scheduler_ddpm.py",
-      "/workspace/scratch/306c018f6a72/ramp-kit-review/diffusers-ramp-kit/tests/fixtures/contribution.patch"
+      "/workspace/scratch/306c018f6a72/ramp-kit-rereview/tests/fixtures/contribution.patch"
     ],
     "exit_code": 0
   },
   {
     "name": "local-full",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
       "verify",
       "empty-timesteps",
       "--level",
@@ -158,10 +172,10 @@
   {
     "name": "local-report",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
+      "/workspace/scratch/306c018f6a72/rereview-integration",
       "report",
       "empty-timesteps"
     ],
@@ -200,8 +214,8 @@
       "git",
       "clone",
       "--no-hardlinks",
-      "/workspace/scratch/306c018f6a72/review-integration-final",
-      "/workspace/scratch/306c018f6a72/review-integration-final-candidate"
+      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/workspace/scratch/306c018f6a72/rereview-integration-candidate"
     ],
     "exit_code": 0
   },
@@ -221,7 +235,7 @@
       "git",
       "diff",
       "--exit-code",
-      "85bf2248a00677e80605a133558d6ee48d89819d",
+      "1903c4f1a5472341caaa461f280ccce59b4a7939",
       "--",
       "setup.py",
       "pyproject.toml"
@@ -231,10 +245,10 @@
   {
     "name": "simulated-ci-full",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final-policy/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration-policy/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final-candidate",
+      "/workspace/scratch/306c018f6a72/rereview-integration-candidate",
       "verify",
       "empty-timesteps",
       "--level",
@@ -245,10 +259,10 @@
   {
     "name": "simulated-ci-report",
     "command": [
-      "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/review-integration-final-policy/.ramp-kit/run.py",
+      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+      "/workspace/scratch/306c018f6a72/rereview-integration-policy/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/review-integration-final-candidate",
+      "/workspace/scratch/306c018f6a72/rereview-integration-candidate",
       "report",
       "empty-timesteps"
     ],

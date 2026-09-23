@@ -13,9 +13,11 @@ Ownership: upstream owns its source and conventions; the platform owner owns the
 
 Upstream `AGENTS.md` is a symlink to `.ai/AGENTS.md` at this pin. Preserve it. The approved context helper uses `.ai/AGENTS.md` directly and continues to reject symlinks in requested paths.
 
-## A second similar task
+## A second similar task — NOT_RUN
 
-Example: “Reject an empty custom list after a schedule has already been configured, and preserve that previous schedule when validation fails.” Reuse the profile and recipe; copy `examples/empty-timesteps.json` to a new task spec with ID `empty-timesteps-preserve-state`. Change the request and AC1 to the state-preservation contract. The agent completes the structural regression method by configuring a valid schedule first, capturing it, then checking both the ValueError and unchanged state. Map that method to the revised criterion; do not reuse old test evidence. This is a worked extension plan, not a separately completed contribution.
+Requirement 4 remains PARTIAL: the profile/scaffold mechanics are tested, but this second-task CLI path has not been demonstrated.
+
+Example: “Reject an empty custom list after a schedule has already been configured, and preserve that previous schedule when validation fails.” Reuse the profile and recipe; use `.ramp-kit/examples/empty-timesteps.json` as schema guidance for a newly authored task spec with ID `empty-timesteps-preserve-state`. Change the request and AC1 to the state-preservation contract. The agent completes the structural regression method by configuring a valid schedule first, capturing it, then checking both the ValueError and unchanged state. Map that method to the revised criterion; do not reuse old test evidence. This is a worked extension plan, not a separately completed contribution.
 
 Commands: `prepare --spec <new-spec>`, cited `assess`, baseline verification before the guard, candidate full verification and `report`. If source, requirements, checks or environment change, evidence is invalidated. New components or different error semantics may require new recipe code and tests.
 
