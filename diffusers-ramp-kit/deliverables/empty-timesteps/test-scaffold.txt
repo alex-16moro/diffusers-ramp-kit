@@ -1,17 +1,21 @@
-# Insert completed methods into DDPMSchedulerTest in the existing test module.
-# This is a scaffold, not a passing test suite. Choose assertions from the task's acceptance criteria.
-# Use the real scheduler via self.scheduler_classes[0](**self.get_scheduler_config()).
-# Follow assertRaisesRegex for the intended exception type and a stable message fragment.
+# Merge these stubs into the existing classes; do not duplicate existing methods.
+# Implement real assertions before baseline verification. Stubs deliberately fail.
 
-def test_empty_custom_timesteps(self):
-    raise NotImplementedError("Add the regression assertion for an empty custom list")
+# tests/schedulers/test_scheduler_ddpm.py
+class DDPMSchedulerTest:
+    def test_empty_custom_timesteps(self):
+        # Acceptance: AC1
+        raise NotImplementedError("Write the mapped behavioural assertions")
 
-def test_custom_timesteps_validation_preserves_valid_inputs(self):
-    raise NotImplementedError("Assert normal and single-element custom timestep values and CPU device")
+    def test_custom_timesteps_validation_preserves_valid_inputs(self):
+        # Acceptance: AC2
+        raise NotImplementedError("Write the mapped behavioural assertions")
 
-def test_count_based_inference_timesteps_unchanged(self):
-    raise NotImplementedError("Assert exact expected timestep values for a normal inference count")
+    def test_custom_timesteps_passing_both_num_inference_steps_and_timesteps(self):
+        # Acceptance: AC3
+        raise NotImplementedError("Write the mapped behavioural assertions")
 
-# Test both DDPMScheduler and DDPMParallelScheduler, following the real imports and constructors.
-# Cover the empty input and the existing argument-conflict precedence.
-# Map the existing mutual-exclusion test as additional evidence in task.json.
+    def test_count_based_inference_timesteps_unchanged(self):
+        # Acceptance: AC4
+        raise NotImplementedError("Write the mapped behavioural assertions")
+

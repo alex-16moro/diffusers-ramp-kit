@@ -1,42 +1,37 @@
 # Final review against the agreed build
 
-**Verdict: the scoped MVP is implemented and locally verified; it is ready for the fresh Cursor rehearsal. It is not yet a verified live Cursor demo or a fully isolated execution environment.**
+**Verdict: changes implemented; CLI evidence is regenerated from the documented bootstrap. The agreed MVP remains PARTIAL until a clean Cursor acceptance run and a real Diffusers fork CI run are recorded.**
 
-Reviewed against `Ramp-Kit-Cursor-Prompt.md`, version 2, modified 2026-09-23 06:49 UTC, and the “Design Diffusers Feature” thread. This final scope supersedes earlier proposals for a larger convention registry, separate Grokbot simulator, mandatory package gate and automatic edit hooks.
+The current measured results are in `review-checks/final-integrity.json`, `review-checks/summary.json` and their logs. `scripts/reproduce.py` performs a labelled CLI fixture rehearsal and a local base-policy CI simulation. It does not represent an autonomous Cursor run. `scripts/export_evidence.py` reruns kit checks, copies newly executed evidence and generates the manifest. Historical recovered-environment evidence is preserved unchanged under `historical/initial-cli-run/` and is not current proof.
 
-## Customer requirement scorecard
+## Requirement scorecard
 
-| Requirement | Actual artifact and proof | Result and limit |
+| Requirement | Implemented evidence | Status and remaining limit |
 |---|---|---|
-| 1. First correct contribution without reading the entire library | `cursor/ramp-entry.mdc`, scoped rule, profile, recipe, `onboard`, `prepare`, structural scaffold, completed three-file contribution patch. `python run.py --repo REF onboard --dest NEW` creates a fresh pinned checkout. | Clean onboarding and CLI journey verified; automatic discovery and autonomous completion in fresh Cursor remain UNVERIFIED. |
-| 2. Catch mistakes and strengthen tests | 24 kit tests; 4 mapped acceptance tests; 78 tests across both scheduler modules; source-cited anti-pattern diagnostic; original-implementation replay. `python -m unittest discover -s tests -v`; in checkout: `python .ramp-kit/run.py --repo . verify empty-timesteps --level full`. | PASS locally. Regression fails before the guard, passes with it, and fails again in a disposable original-implementation snapshot. No claim of full Diffusers/GPU coverage. |
-| 3. Fit CI, guardrails and path to deployment | Additive fork workflow runs the same runner using kit code on the exact approved PR base SHA. `RELEASE.md` specifies installation, review, package/consumer commands, promotion and rollback. Context/path/scope checks and stale evidence rejection are executable. | Local checks PASS. CI configured, remote CI NOT RUN. Whole-agent filesystem/network isolation UNMET. Optional wheel build and staging smoke NOT RUN. |
-| 4. Maintainability as the library changes | Profile/source hashes and symbols; `doctor`; tests for drift, scope and invalid bases; task-specific data; `MAINTENANCE.md` update process and second similar task example. | Mechanisms verified locally. Second-task example is an extension plan, not a completed second contribution. No automatic semantic compatibility claim. |
-| 5. PM, QA and DevOps benefit from one workflow | `report` generates one HTML page and Markdown from the shared task/results, with criteria, design, mapped tests, log links, provenance and delivery status. | Implemented; data and links checked. Human approval and role-based collaborative sign-off are not implemented or implied. |
+| 1. First correct contribution | Commit-safe attachment, explicit Python 3.12 bootstrap, agent-written spec instructions and task-derived scaffold; fresh-clone doctor and CLI regression journey | PARTIAL: clean Cursor rerun pending; exploratory run recorded with setup deviations. Automatic discovery and agent spec authorship remain unverified in the clean session. |
+| 2. Catch mistakes and strengthen tests | Mapped assertion check with negative fixture, actionable baseline failures, correct check/error exit codes, separate pre-implementation and replay records, full affected-module verification | PASS for the scoped local MVP when the generated checks pass. Syntactic assertion presence is not proof of semantic quality or reachability. Pre-implementation order is instructed; replay can independently support readiness, with truthful labels. |
+| 3. CI, guardrails and delivery path | Installation survives normal commit/clone; base-policy runner simulation verifies the same patch; root kit CI workflow restored; policy digests and check counts displayed | PARTIAL until actual Diffusers fork PR CI runs against `ramp-base`. Kit repository Actions and local simulations do not satisfy that gate. Whole-agent filesystem/network isolation remains UNMET. Optional packaging and deployment NOT_RUN. |
+| 4. Maintainability | Task validation and mapped scaffold generation, pinned source hashes/symbols, regression tests and maintenance instructions | PASS for the bounded recipe mechanics. A second-task contribution remains an extension plan, not demonstrated support for other scheduler families. |
+| 5. Shared PM/QA/DevOps handoff | Stable patch digest, separate baseline/replay, required/executed counts, installation/runner policy digest, draft wording inventory and precise delivery status | PASS for generated local handoff evidence. Exact wording approval, remote fork CI and collaborative human sign-off remain NOT_RUN. |
 
-## Corrections made in this review
+## Review requests addressed
 
-- Added the required disposable fix-removal replay to full verification and CI; submitted green evidence is not accepted in place of rerunning it.
-- Replaced the weak count-based criterion mapping with a direct assertion of `[750, 500, 250, 0]` for four inference steps.
-- Tested empty input, argument-error precedence, valid single/list inputs, CPU tensor values/dtype, and count-based inference on both DDPM classes.
-- Changed the guard to an explicit length check; no invented fallback or numerical algorithm change.
-- Made stale status apply to all displayed checks and PR draft entries, not only the page headline.
-- Included the actual logs/XML alongside the report, with relative links.
-- Added clean onboarding, a prepared-state snapshot, detailed release and maintenance instructions, and a fresh Cursor acceptance form.
-- Corrected the kit distribution to a source bundle invoked through `run.py`; removed the misleading installable-package entry point that omitted its resources.
-- Kept the upstream dependency-table check in a disposable snapshot because that upstream command rewrites generated data.
+- **A1:** `requirements.txt` and narrowly scoped `.gitignore` exceptions; unit and integration checks stage with plain `git add -A`, commit, clone, and verify every attachment manifest path.
+- **A2:** all bootstrap selection uses `${PYTHON:-python3.12}`; missing interpreter/venv diagnostics include explicit recovery. A partial environment without pip is recreated on retry. Cold installation evidence is generated. Interpreter-selection failure paths are additionally tested with simulated executables; the actual host's `python3` is also 3.12, so the cold run is not a test on a real 3.11-default machine.
+- **A3:** a shared deterministic patch function uses full blob IDs and explicit formatting. Local/simulation digests are compared. Deliverables come from the documented cold bootstrap; old evidence is separately archived.
+- **A4:** missing kit ignore/workflow files restored; an active repository-root workflow handles the nested layout. No prepared task snapshot is claimed or shipped; its obsolete manifest entries are removed by regeneration.
+- **A5:** the entry rule reads `.ai/AGENTS.md`, uses `.ramp-venv`, and prohibits redundant setup or networked skill installation/listing during this prepared session. Upstream coding and human-review guidance remain applicable.
+- **B1:** mapped methods without a supported assertion fail before execution. `pass`, raise-only stubs and assertions hidden in nested helpers are negative cases. No mutation-testing or universal quality claim.
+- **B2:** baseline pass, skip, wrong exception/origin and execution error produce distinct reasons. Missing/pending design assessment is a check failure (exit 1).
+- **B3:** baseline and replay have independent records and provenance. Replay never overwrites or fabricates the pre-implementation record.
+- **B4:** handoff displays required/executed counts and runner/installation digests. The installation reference is explicitly locally editable. Only fork CI enforces policy integrity, subject to maintainer protection of its base policy and workflow.
+- **B5:** the agent must author a spec from the request and inspected code; the example is schema guidance. `prepare` validates it and creates method stubs from mapped IDs. Actual autonomous authorship remains part of the pending Cursor acceptance run.
+- **B6:** generated reports and PR drafts include proposed commit wording, new/changed Python literals, docstrings and comments, with approval NOT_RUN. Review the complete patch too; dynamic text cannot be exhaustively classified by a small static extractor.
 
-## Readiness distinctions
+## Remaining acceptance evidence
 
-- Builder CLI rehearsal: **PASS**, using the recovered pinned Linux CPU environment.
-- Re-downloading/installing the entire environment on a new machine: **NOT RUN in this final review**. Bootstrap instructions and lockfile are provided; complete this before the demo.
-- Cursor rule format: checked against the official rules documentation at https://cursor.com/docs/rules on 2026-09-23.
-- Actual Cursor version, rule discovery and agent journey: **UNVERIFIED**; complete `CURSOR-REHEARSAL.md`.
-- Full OS/network isolation, remote CI, package installability and production release: **not established**.
-- Business impact: hypothesis and measurement plan only; no fabricated time saving or reviewer improvement.
+1. Perform the exact `[999]` clean Cursor run using `START_HERE.md` and record it in `CURSOR-REHEARSAL.md`, including workspace/rule screenshot, initial Git status/stashes, model/version, timings/interventions and every result/log.
+2. Keep the exploratory fallback variant separate. Demonstrate the announced DDPM-only staged failure after the clean run in another disposable checkout.
+3. Install the reviewed kit on the user-owned Diffusers fork's pinned `ramp-base`, then run a real contribution PR against it. Record its Actions URL/conclusion, base/head SHAs and patch digest matching the local contribution. Publishing this kit PR does not imply that the separate fork was modified or verified.
 
-Optional package automation, a live maintenance scenario and whole-agent container isolation were omitted under the agreed cut-line. The kit is deliberately limited to the scheduler input-validation recipe. No extra agent, MCP service, database or universal generator is needed for this scope.
-
-## Recommended handoff
-
-Read `START_HERE.md`. Prepare dependencies in the supported Linux execution environment, open only the newly generated onboarding checkout in Cursor, and give the one natural-language task. Do not open this bundle's completed evidence in that fresh agent session. Use `DEMO.md` for the 8–12 minute walkthrough after the rehearsal passes.
+No container isolation, extra agents, MCP, database, hooks, expanded scheduler recipe or packaging automation was added. Business improvement remains a measurement hypothesis, not an observed time-saving claim.

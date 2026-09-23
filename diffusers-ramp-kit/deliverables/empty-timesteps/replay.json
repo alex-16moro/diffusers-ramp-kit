@@ -1,0 +1,49 @@
+{
+  "status": "EXPECTED_FAILURE",
+  "run_id": "20260923T100746995936Z",
+  "intended_failure_observed": true,
+  "origin": "Disposable original-implementation replay during full verification",
+  "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
+  "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+  "test_sha256": "6dd01ea361d93c6af83dff24966186f6c6a2c3757e6548927a6da73f9e2fd138",
+  "task_sha256": "654bb9fee8292411edd697f401ec024eb476e9ead6a67ab00c6dbb0818afb746",
+  "checks": [
+    {
+      "id": "test-strength",
+      "status": "PASS",
+      "command": [
+        "/workspace/scratch/306c018f6a72/review-integration-final/.ramp-venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml",
+        "/tmp/ramp-strength-bsxj7vn7/checkout/.ramp-replay/regression.xml",
+        "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
+      ],
+      "exit_code": 1,
+      "seconds": 4.787,
+      "log": ".ramp/empty-timesteps/runs/20260923T100746995936Z/test-strength.log",
+      "tests": [
+        {
+          "name": "test_empty_custom_timesteps",
+          "class": "tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest",
+          "status": "FAIL",
+          "detail": "IndexError: list index out of range\nself = <tests.schedulers.test_scheduler_ddpm.DDPMSchedulerTest testMethod=test_empty_custom_timesteps>\n\n    def test_empty_custom_timesteps(self):\n        for scheduler_class in (DDPMScheduler, DDPMParallelScheduler):\n            scheduler = scheduler_class(**self.get_scheduler_config())\n            with self.assertRaisesRegex(ValueError, \"timesteps.*empty\"):\n>               scheduler.set_timesteps(timesteps=[])\n\ntests/schedulers/test_scheduler_ddpm.py:163: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n    def set_timesteps(\n        self,\n        num_inference_steps: int = None,\n        device: str | torch.device = None,\n        timesteps: list[int] | None = None,\n    ):\n        \"\"\"\n        Sets the discrete timesteps used for the diffusion chain (to be run before inference).\n    \n        Args:\n            num_inference_steps (`int`, *optional*):\n                The number of diffusion steps used when generating samples with a pre-trained model. If used,\n                `timesteps` must be `None`.\n            device (`str` or `torch.device`, *optional*):\n                The device to which the timesteps should be moved to. If `None`, the timesteps are not moved.\n            timesteps (`list[int]`, *optional*):\n                Custom timesteps used to support arbitrary spacing between timesteps. If `None`, then the default\n                timestep spacing strategy of equal spacing between timesteps is used. If `timesteps` is passed,\n                `num_inference_steps` must be `None`.\n    \n        \"\"\"\n        if num_inference_steps is not None and timesteps is not None:\n            raise ValueError(\"Can only pass one of `num_inference_steps` or `custom_timesteps`.\")\n    \n        if timesteps is not None:\n            for i in range(1, len(timesteps)):\n                if timesteps[i] >= timesteps[i - 1]:\n                    raise ValueError(\"`custom_timesteps` must be in descending order.\")\n    \n>           if timesteps[0] >= self.config.num_train_timesteps:\nE           IndexError: list index out of range\n\nsrc/diffusers/schedulers/scheduling_ddpm.py:303: IndexError"
+        }
+      ],
+      "counts": {
+        "PASS": 0,
+        "FAIL": 1,
+        "ERROR": 0,
+        "SKIPPED": 0,
+        "total": 1
+      },
+      "working_directory": "Disposable pinned snapshot (removed after check)",
+      "expected_failure_observed": true,
+      "method": "Restore pinned implementation with the candidate regression test in a disposable snapshot.",
+      "implementation_changed": true
+    }
+  ]
+}

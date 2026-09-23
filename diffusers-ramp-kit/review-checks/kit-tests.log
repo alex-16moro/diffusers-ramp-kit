@@ -1,21 +1,32 @@
+test_default_interpreter_and_missing_venv_diagnostic (test_bootstrap.BootstrapTests.test_default_interpreter_and_missing_venv_diagnostic) ... ok
+test_explicit_missing_interpreter_has_actionable_message (test_bootstrap.BootstrapTests.test_explicit_missing_interpreter_has_actionable_message) ... ok
+test_assertion_free_candidate_cannot_reach_ready (test_core.WorkflowTests.test_assertion_free_candidate_cannot_reach_ready) ... ok
 test_attach_idempotence_and_tamper_detection (test_core.WorkflowTests.test_attach_idempotence_and_tamper_detection) ... ok
+test_baseline_failure_reasons_and_exit_contract (test_core.WorkflowTests.test_baseline_failure_reasons_and_exit_contract) ... ok
 test_broad_exception_swallowing_diagnostic (test_core.WorkflowTests.test_broad_exception_swallowing_diagnostic) ... ok
 test_context_allowlist_and_symbol (test_core.WorkflowTests.test_context_allowlist_and_symbol) ... ok
 test_deletion_detected (test_core.WorkflowTests.test_deletion_detected) ... ok
+test_empty_and_raise_only_mapped_tests_are_rejected (test_core.WorkflowTests.test_empty_and_raise_only_mapped_tests_are_rejected) ... ok
 test_evidence_changes_with_code_and_requirement (test_core.WorkflowTests.test_evidence_changes_with_code_and_requirement) ... ok
 test_existing_test_filename_selected (test_core.WorkflowTests.test_existing_test_filename_selected) ... ok
 test_fresh_onboarding_excludes_solution_and_credentials (test_core.WorkflowTests.test_fresh_onboarding_excludes_solution_and_credentials) ... ok
 test_invalid_base_never_means_no_changes (test_core.WorkflowTests.test_invalid_base_never_means_no_changes) ... ok
 test_mapped_test_cannot_be_missing_from_successful_result (test_core.WorkflowTests.test_mapped_test_cannot_be_missing_from_successful_result) ... ok
 test_missing_test_report_is_execution_error (test_core.WorkflowTests.test_missing_test_report_is_execution_error) ... ok
+test_normal_commit_and_clone_preserves_entire_attachment (test_core.WorkflowTests.test_normal_commit_and_clone_preserves_entire_attachment) ... ok
 test_old_green_report_is_stale (test_core.WorkflowTests.test_old_green_report_is_stale) ... ok
+test_patch_digest_ignores_git_display_configuration (test_core.WorkflowTests.test_patch_digest_ignores_git_display_configuration) ... ok
 test_pending_design_stops_execution (test_core.WorkflowTests.test_pending_design_stops_execution) ... ok
 test_preexisting_anti_pattern_is_not_new_finding (test_core.WorkflowTests.test_preexisting_anti_pattern_is_not_new_finding) ... ok
 test_pushback_needs_evidence_and_alternative (test_core.WorkflowTests.test_pushback_needs_evidence_and_alternative) ... ok
 test_regression_trace_must_reach_implementation (test_core.WorkflowTests.test_regression_trace_must_reach_implementation) ... ok
+test_replay_does_not_overwrite_preimplementation_record (test_core.WorkflowTests.test_replay_does_not_overwrite_preimplementation_record) ... ok
 test_report_marks_all_prior_checks_stale (test_core.WorkflowTests.test_report_marks_all_prior_checks_stale) ... ok
+test_report_shows_policy_counts_and_exact_wording (test_core.WorkflowTests.test_report_shows_policy_counts_and_exact_wording) ... ok
+test_scaffold_uses_task_mappings_and_deduplicates (test_core.WorkflowTests.test_scaffold_uses_task_mappings_and_deduplicates) ... ok
 test_skipped_test_never_passes (test_core.WorkflowTests.test_skipped_test_never_passes) ... ok
 test_source_drift_reported (test_core.WorkflowTests.test_source_drift_reported) ... ok
+test_supported_assertion_patterns (test_core.WorkflowTests.test_supported_assertion_patterns) ... ok
 test_symlink_rejected (test_core.WorkflowTests.test_symlink_rejected) ... ok
 test_task_cannot_choose_shell_as_test (test_core.WorkflowTests.test_task_cannot_choose_shell_as_test) ... ok
 test_task_cannot_replace_pinned_base (test_core.WorkflowTests.test_task_cannot_replace_pinned_base) ... ok
@@ -24,6 +35,6 @@ test_unmapped_acceptance_criterion_rejected (test_core.WorkflowTests.test_unmapp
 test_untracked_out_of_scope_detected (test_core.WorkflowTests.test_untracked_out_of_scope_detected) ... ok
 
 ----------------------------------------------------------------------
-Ran 24 tests in 0.962s
+Ran 35 tests in 1.782s
 
 OK

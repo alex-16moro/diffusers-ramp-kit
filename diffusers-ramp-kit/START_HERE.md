@@ -4,7 +4,7 @@ The newcomer experience starts in a fresh Diffusers checkout. Keep this bundle, 
 
 ## 1. Prepare once, before the demo
 
-The verified execution environment is Linux x86-64, Python 3.12, CPU Torch 2.7.1. Cursor can be on another computer, but its project terminal must use that environment. Native macOS/Windows dependency installation has not been tested; use a Linux environment for the recorded reproduction. This bundle is run directly with `run.py`; it is not an installable PyPI package.
+The supported execution environment is Linux x86-64, Python 3.12, CPU Torch 2.7.1. Cursor can be on another computer, but its project terminal must use that environment. Native macOS/Windows dependency installation has not been tested; use a Linux environment for the recorded reproduction. This bundle is run directly with `run.py`; it is not an installable PyPI package.
 
 From the extracted `diffusers-ramp-kit` folder, with Git and Python 3.12 available, run:
 
@@ -20,11 +20,11 @@ python .ramp-kit/run.py --repo . doctor
 
 `onboard` checks out the exact pinned commit on `ramp/first-contribution`, copies the runtime kit and Cursor rules, and omits untracked files, old evidence and completed solutions. It refuses an existing destination. The source clone may have a newer HEAD; the onboarding checkout always uses the profile's pinned revision. If the clone lacks the pinned commit, fetch that exact commit from the approved upstream and retry. The upstream remote is a source only; the eventual contribution destination is the user's fork.
 
-Bootstrap downloads packages. Do it before the demo. The final review reused the recovered pinned environment and did not re-download all packages into a new machine; cold bootstrap remains an operator setup check. Once prepared, checks use local source/dependencies and offline Hugging Face settings. Those settings do not block arbitrary network traffic.
+Bootstrap downloads packages. Do it before the demo. Bootstrap explicitly selects `python3.12` (or `PYTHON=/path/to/python3.12`). If environment creation fails, install `python3.12-venv`, or create `.ramp-venv` with an already available `virtualenv` and rerun bootstrap. Do not spoof versions or use the recovered environment as cold-install evidence. See the generated `review-checks/final-integrity.json` for the latest executed checks. Once prepared, checks use local source/dependencies and offline Hugging Face settings. Those settings do not block arbitrary network traffic.
 
 ## 2. Open only `diffusers-onboarding` in a fresh Cursor Agent session
 
-Check that `.cursor/rules/ramp-entry.mdc` appears as Always Apply in Cursor's Rules view. Set the project interpreter to `.ramp-venv/bin/python`. Disable web/MCP/external retrieval for this rehearsal. Start a new chat without this build conversation, the ZIP, or `deliverables/` in context.
+Record the absolute open folder, `git status --short`, and `git stash list`. Capture a screenshot showing that `.cursor/rules/ramp-entry.mdc` appears as Always Apply in Cursor's Rules view. Set the project interpreter to `.ramp-venv/bin/python`. Disable web/MCP/external retrieval for this rehearsal. Start a new chat without this build conversation, the ZIP, or `deliverables/` in context.
 
 Give only this request:
 
@@ -34,6 +34,6 @@ The agent should discover the guidance, read source, push back on the suggested 
 
 ## 3. Record the runtime acceptance test
 
-Use `CURSOR-REHEARSAL.md` to record the actual Cursor version and observed journey. The builder's CLI rehearsal passed. A fresh Cursor agent session is still unverified. Do not call the live demo ready until it passes.
+Use `CURSOR-REHEARSAL.md` to record the actual Cursor version and observed journey. The builder's CLI rehearsal passed. The exploratory Cursor run had setup deviations. A clean acceptance run is still pending; record it separately. Do not call the live demo ready until it passes.
 
 Open `.ramp/empty-timesteps/review.html` for the shared handoff. PM reviews criteria; QA inspects test evidence; DevOps reviews CI and the release handoff. `READY_FOR_HUMAN_REVIEW` is local evidence, not approval, remote CI, or deployment.

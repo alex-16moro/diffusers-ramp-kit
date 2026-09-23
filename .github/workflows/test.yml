@@ -1,0 +1,43 @@
+name: Ramp kit tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: diffusers-ramp-kit
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -v
+      - run: sha256sum -c CONTENTS.sha256
+  integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch pinned source
+        run: |
+          git init "$RUNNER_TEMP/source"
+          git -C "$RUNNER_TEMP/source" remote add origin https://github.com/huggingface/diffusers.git
+          git -C "$RUNNER_TEMP/source" fetch --depth=1 origin 0121a91f9d419ff7234c8a5923f82c244e6f1914
+          git -C "$RUNNER_TEMP/source" checkout --detach FETCH_HEAD
+      - name: Cold bootstrap, contribution replay and local CI simulation
+        run: python diffusers-ramp-kit/scripts/reproduce.py --source "$RUNNER_TEMP/source" --work "$RUNNER_TEMP/rehearsal" --output "$RUNNER_TEMP/evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kit-integration-evidence
+          path: ${{ runner.temp }}/evidence/
+          include-hidden-files: true

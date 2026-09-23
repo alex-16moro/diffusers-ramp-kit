@@ -1,10 +1,10 @@
 {
   "status": "ONBOARDING_READY",
-  "checkout": "/workspace/scratch/306c018f6a72/verified-onboarding",
+  "checkout": "/workspace/scratch/306c018f6a72/review-integration-final",
   "attachment": {
     "status": "ATTACHED",
-    "kit_sha256": "b334e02c36417d19a6d41c20c08cc413425d3ae373c73fb8c82681dd4522186b",
-    "files_added": 20,
+    "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+    "files_added": 21,
     "next_action": "Open this checkout in a fresh Cursor session and describe the task."
   },
   "next_action": "Bootstrap dependencies, then open ONLY this checkout in a fresh Cursor session. Do not add the kit bundle or completed examples to that workspace."

@@ -1,0 +1,29 @@
+test_attach_idempotence_and_tamper_detection (test_core.WorkflowTests.test_attach_idempotence_and_tamper_detection) ... ok
+test_broad_exception_swallowing_diagnostic (test_core.WorkflowTests.test_broad_exception_swallowing_diagnostic) ... ok
+test_context_allowlist_and_symbol (test_core.WorkflowTests.test_context_allowlist_and_symbol) ... ok
+test_deletion_detected (test_core.WorkflowTests.test_deletion_detected) ... ok
+test_evidence_changes_with_code_and_requirement (test_core.WorkflowTests.test_evidence_changes_with_code_and_requirement) ... ok
+test_existing_test_filename_selected (test_core.WorkflowTests.test_existing_test_filename_selected) ... ok
+test_fresh_onboarding_excludes_solution_and_credentials (test_core.WorkflowTests.test_fresh_onboarding_excludes_solution_and_credentials) ... ok
+test_invalid_base_never_means_no_changes (test_core.WorkflowTests.test_invalid_base_never_means_no_changes) ... ok
+test_mapped_test_cannot_be_missing_from_successful_result (test_core.WorkflowTests.test_mapped_test_cannot_be_missing_from_successful_result) ... ok
+test_missing_test_report_is_execution_error (test_core.WorkflowTests.test_missing_test_report_is_execution_error) ... ok
+test_old_green_report_is_stale (test_core.WorkflowTests.test_old_green_report_is_stale) ... ok
+test_pending_design_stops_execution (test_core.WorkflowTests.test_pending_design_stops_execution) ... ok
+test_preexisting_anti_pattern_is_not_new_finding (test_core.WorkflowTests.test_preexisting_anti_pattern_is_not_new_finding) ... ok
+test_pushback_needs_evidence_and_alternative (test_core.WorkflowTests.test_pushback_needs_evidence_and_alternative) ... ok
+test_regression_trace_must_reach_implementation (test_core.WorkflowTests.test_regression_trace_must_reach_implementation) ... ok
+test_report_marks_all_prior_checks_stale (test_core.WorkflowTests.test_report_marks_all_prior_checks_stale) ... ok
+test_skipped_test_never_passes (test_core.WorkflowTests.test_skipped_test_never_passes) ... ok
+test_source_drift_reported (test_core.WorkflowTests.test_source_drift_reported) ... ok
+test_symlink_rejected (test_core.WorkflowTests.test_symlink_rejected) ... ok
+test_task_cannot_choose_shell_as_test (test_core.WorkflowTests.test_task_cannot_choose_shell_as_test) ... ok
+test_task_cannot_replace_pinned_base (test_core.WorkflowTests.test_task_cannot_replace_pinned_base) ... ok
+test_traversal_rejected (test_core.WorkflowTests.test_traversal_rejected) ... ok
+test_unmapped_acceptance_criterion_rejected (test_core.WorkflowTests.test_unmapped_acceptance_criterion_rejected) ... ok
+test_untracked_out_of_scope_detected (test_core.WorkflowTests.test_untracked_out_of_scope_detected) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.962s
+
+OK

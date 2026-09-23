@@ -1,0 +1,4 @@
+# Negative fixture: mapped acceptance test without behavioural assertions.
+class Tests:
+    def test_empty(self):
+        pass

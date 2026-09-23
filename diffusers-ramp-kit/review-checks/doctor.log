@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
+  "runtime": {
+    "python": "3.12.14",
+    "torch": "2.7.1+cpu",
+    "pytest": "8.3.5",
+    "ruff": "0.9.10",
+    "huggingface-hub": "1.32.0",
+    "safetensors": "0.8.0"
+  },
+  "findings": [],
+  "kit_sha256": "87810cdba5a90ffb6cd9c7ffaf78adcddd6f90c75480ec5dc986e478d2737a57",
+  "limitations": [
+    "Whole-agent OS/network isolation is not enforced by this kit.",
+    "Architectural fit is an agent judgement requiring human review."
+  ]
+}

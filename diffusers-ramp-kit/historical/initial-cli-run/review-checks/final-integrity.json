@@ -1,0 +1,8 @@
+{
+  "protected_upstream_instructions_and_workflows": "PASS",
+  "CI_yaml_and_shared_entry_point": "PASS",
+  "kit_digest_matches_attached_copy": "PASS",
+  "kit_sha256": "b334e02c36417d19a6d41c20c08cc413425d3ae373c73fb8c82681dd4522186b",
+  "remote_ci": "NOT_RUN",
+  "cursor_session": "UNVERIFIED"
+}
