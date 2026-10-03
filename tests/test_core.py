@@ -155,6 +155,15 @@ class WorkflowTests(unittest.TestCase):
             "status": "PASS",
             "level": "full",
             "checks": checks,
+            "required_checks": core.required_checks(),
+            "counts": {
+                "checks": len(checks),
+                "PASS": len(checks),
+                "FAIL": 0,
+                "ERROR": 0,
+                "SKIPPED": 0,
+                "NOT_RUN": 0,
+            },
         }
         core.write(
             self.directory / "baseline.json",
@@ -187,6 +196,67 @@ class WorkflowTests(unittest.TestCase):
                 invalid[field] = value
                 core.write(self.directory / "candidate.json", invalid)
                 self.assertEqual(core.readiness(self.repo, self.task)["status"], "INCOMPLETE")
+
+    def test_missing_assessment_explains_how_to_record_it(self):
+        (self.directory / "architecture.json").unlink()
+        with patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}):
+            result = core.verify(self.repo, "task", "fast", "candidate")
+        message = next(f["message"] for f in result["findings"] if f["rule"] == "DESIGN")
+        self.assertIn("No architecture assessment recorded", message)
+        self.assertIn("assess task", message)
+
+    def test_missing_approved_citation_has_actionable_error(self):
+        record = core.load(self.directory / "architecture.json")
+        (self.repo / self.source).unlink()
+        with self.assertRaisesRegex(core.RampError, "Cannot read assessment source.*src/scheduler.py"):
+            core.validate_assessment(self.repo, self.task, record)
+
+    def test_verify_record_is_ready_and_repair_reasons_are_specific(self):
+        (self.repo / self.tests).write_text(
+            "class Tests:\n    def test_empty(self):\n        assert actual == 1\n"
+        )
+
+        def passed(repo, logs, name, *args, **kwargs):
+            return {"id": name, "status": "PASS"}
+
+        with (
+            patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+            patch.object(core, "pytest_check", side_effect=passed),
+            patch.object(core, "run_check", side_effect=passed),
+            patch.object(core, "replay_regression", return_value={"id": "test-strength", "status": "PASS"}),
+        ):
+            candidate = core.verify(self.repo, "task", "full", "candidate")
+        self.assertEqual(core.readiness(self.repo, self.task)["status"], "READY_FOR_HUMAN_REVIEW")
+        for edit, message in (
+            (lambda c: c.pop("counts"), "Missing counts"),
+            (lambda c: c.pop("required_checks"), "Missing required_checks"),
+            (lambda c: c["checks"].pop(), "Missing required checks: test-strength"),
+            (lambda c: c["checks"].append(c["checks"][0]), "Duplicate check IDs: acceptance"),
+            (lambda c: c["checks"][0].update(status="FAIL"), "acceptance=FAIL"),
+            (lambda c: c["counts"].update(PASS=999), "counts mismatch"),
+            (lambda c: c.update(required_checks=["invented"]), "required_checks mismatch"),
+        ):
+            with self.subTest(message=message):
+                invalid = copy.deepcopy(candidate)
+                edit(invalid)
+                core.write(self.directory / "candidate.json", invalid)
+                state = core.readiness(self.repo, self.task)
+                self.assertEqual(state["status"], "INCOMPLETE")
+                self.assertIn(message, state["reason"])
+
+    def test_malformed_candidate_is_incomplete(self):
+        for candidate in (
+            [],
+            None,
+            {},
+            {"fingerprint": "current"},
+            {"fingerprint": [], "status": "PASS", "level": "full"},
+        ):
+            with self.subTest(candidate=candidate):
+                core.write(self.directory / "candidate.json", candidate)
+                state = core.readiness(self.repo, self.task)
+                self.assertEqual(state["status"], "INCOMPLETE")
+                self.assertIn("Malformed candidate", state["reason"])
 
     def test_assessment_consumption_validates_citations(self):
         valid = core.load(self.directory / "architecture.json")
