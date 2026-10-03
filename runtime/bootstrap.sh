@@ -7,12 +7,13 @@ PY=${PYTHON:-python3.12}
 command -v "$PY" >/dev/null || { echo 'Python 3.12 is required. Install it or set PYTHON to its executable.' >&2; exit 2; }
 "$PY" -c 'import sys; assert sys.version_info[:2] == (3, 12), "Use Python 3.12 (set PYTHON to its executable)"'
 VENV="$REPO/.ramp-venv"
-# Replace only a recognised Python environment at the kit's own path; never delete
-# anything else that happens to be there.
+# The kit's environment must be a real directory holding a Python environment. This runs
+# before anything is probed, installed or written, so nothing is replaced or written
+# through a link.
 refuse_unmanaged_venv() {
     if [ -L "$VENV" ]; then
-        echo "$VENV is a symbolic link without a usable Python 3.12 environment behind it; nothing was removed." >&2
-        echo "Remove the link (or repair its target) yourself, then rerun this script." >&2
+        echo "$VENV is a symbolic link; nothing was changed. The kit installs only into a real directory at this path." >&2
+        echo "Remove the link yourself (its target is left as it is), then rerun this script." >&2
         exit 2
     fi
     if [ -e "$VENV" ] && [ ! -f "$VENV/pyvenv.cfg" ]; then
@@ -38,8 +39,8 @@ create_venv() {
     rm -rf "$VENV"
     return 1
 }
+refuse_unmanaged_venv
 if [ ! -x "$REPO/.ramp-venv/bin/python" ] || ! "$REPO/.ramp-venv/bin/python" -m pip --version >/dev/null 2>&1; then
-    refuse_unmanaged_venv
     if ! create_venv; then
         echo "Cannot create .ramp-venv: venv lacks ensurepip, and neither the interpreter's pip nor virtualenv is available." >&2
         echo "Install python3.12-venv (Debian/Ubuntu) or virtualenv for $PY, or set PYTHON to a Python 3.12 that has them, then rerun this script." >&2

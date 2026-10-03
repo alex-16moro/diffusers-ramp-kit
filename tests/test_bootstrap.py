@@ -101,6 +101,24 @@ class BootstrapTests(unittest.TestCase):
             self.assertTrue((root / ".ramp-venv").is_symlink())
             self.assertTrue((target / "pyvenv.cfg").is_file())
 
+    def test_usable_symlinked_environment_is_not_written_through(self):
+        script = Path(__file__).resolve().parents[1] / "runtime/bootstrap.sh"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "elsewhere"
+            (target / "bin").mkdir(parents=True)
+            (target / "pyvenv.cfg").write_text("")
+            (target / "bin/python").write_text("#!/bin/sh\nexit 0\n")  # Passes the pip probe.
+            (target / "bin/python").chmod(0o755)
+            (root / ".ramp-venv").symlink_to(target)
+            result = subprocess.run(
+                ["bash", str(script), str(root)], env=self.venv_stub(root), capture_output=True, text=True
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("symbolic link", result.stderr)
+            self.assertFalse((target / ".gitignore").exists())
+            self.assertEqual(sorted(p.name for p in target.iterdir()), ["bin", "pyvenv.cfg"])
+
     def test_broken_managed_environment_is_replaced(self):
         script = Path(__file__).resolve().parents[1] / "runtime/bootstrap.sh"
         with tempfile.TemporaryDirectory() as tmp:
