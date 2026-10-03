@@ -80,9 +80,13 @@ def attach(repo: Path) -> dict:
     # All conflict checks happen before writes; existing instruction files are never touched.
     ignore = core.safe_path(repo, ".gitignore")
     old_ignore = ignore.read_text() if ignore.exists() else ""
-    for relative in mapping:
-        if core.safe_path(repo, relative).exists():
-            raise core.RampError(f"Attachment would overwrite {relative}; choose a clean checkout.")
+    conflicts = [relative for relative in mapping if core.safe_path(repo, relative).exists()]
+    if conflicts:
+        raise core.RampError(
+            f"ATTACH_CONFLICT: {', '.join(conflicts)} already exist, probably from another kit or overlay. "
+            "Nothing was changed. Install on a new ramp-base branch created at the pinned commit "
+            "(RELEASE.md); do not merge or overwrite the other installation."
+        )
     for relative, source in mapping.items():
         target = core.safe_path(repo, relative)
         target.parent.mkdir(parents=True, exist_ok=True)
