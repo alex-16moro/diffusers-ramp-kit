@@ -1,6 +1,6 @@
 # Final review against the agreed build
 
-**Verdict: changes implemented; CLI evidence is regenerated from the documented bootstrap. The agreed MVP remains PARTIAL until a clean Cursor acceptance run and a real Diffusers fork CI run are recorded.**
+**Verdict: changes implemented; CLI evidence is regenerated from the documented bootstrap. The agreed MVP remains PARTIAL until a clean Cursor acceptance run is recorded.** Real Diffusers fork CI has since run twice: a fixture wiring check (alex-16moro/diffusers#23) and a coached, assisted Cursor PR (alex-16moro/diffusers#25). Neither is clean acceptance. See `CURSOR-REHEARSAL.md` and the status update below.
 
 The current measured results are in `review-checks/final-integrity.json`, `review-checks/summary.json` and their logs. `scripts/reproduce.py` performs a labelled CLI fixture rehearsal and a local base-policy CI simulation. It does not represent an autonomous Cursor run. `scripts/export_evidence.py` reruns kit checks, copies newly executed evidence and generates the manifest. Historical recovered-environment evidence is preserved unchanged under `historical/initial-cli-run/` and is not current proof.
 
@@ -8,9 +8,9 @@ The current measured results are in `review-checks/final-integrity.json`, `revie
 
 | Requirement | Implemented evidence | Status and remaining limit |
 |---|---|---|
-| 1. First correct contribution | Commit-safe attachment, explicit Python 3.12 bootstrap, agent-written spec instructions and task-derived scaffold; fresh-clone doctor and CLI regression journey | PARTIAL: clean Cursor rerun pending; exploratory run recorded with setup deviations. Automatic discovery and agent spec authorship remain unverified in the clean session. |
+| 1. First correct contribution | Commit-safe attachment, explicit Python 3.12 bootstrap, agent-written spec instructions and task-derived scaffold; fresh-clone doctor and CLI regression journey | PARTIAL: clean Cursor run pending. An exploratory run (setup deviations) and a coached, assisted run (alex-16moro/diffusers#25, step-by-step prompt) are recorded. Automatic discovery and unprompted agent spec authorship remain unverified. |
 | 2. Catch mistakes and strengthen tests | Mapped assertion check with negative fixture, actionable baseline failures, correct check/error exit codes, separate pre-implementation and replay records, full affected-module verification | PASS for the scoped local MVP when the generated checks pass. Non-constant assertion presence is not proof of semantic quality or reachability. Pre-implementation order is instructed; replay can independently support readiness, with truthful labels. |
-| 3. CI, guardrails and delivery path | Installation survives normal commit/clone; base-policy runner simulation verifies the same patch; repository-root kit CI workflow; policy digests and check counts displayed | PARTIAL until actual Diffusers fork PR CI runs against `ramp-base`. Kit repository Actions and local simulations do not satisfy that gate. Whole-agent filesystem/network isolation remains UNMET. Optional packaging and deployment NOT_RUN. |
+| 3. CI, guardrails and delivery path | Installation survives normal commit/clone; base-policy runner simulation verifies the same patch; repository-root kit CI workflow; policy digests and check counts displayed | PARTIAL. Fork PR CI ran against the pinned installation for a fixture (#23, `ramp-base` at `961cf0f`) and for a coached Cursor PR (#25, `ramp-demo` at `39c52af`). Each matched its local patch digest. CI does not yet record the PR head, tested-checkout or policy SHAs or the run ID. Whole-agent filesystem/network isolation remains UNMET. Optional packaging and deployment NOT_RUN. |
 | 4. Maintainability | Task validation and mapped scaffold generation, pinned source hashes/symbols, regression tests and maintenance instructions | PARTIAL: bounded recipe mechanics are tested, but the second-task prepare/baseline/full-verify path remains NOT_RUN. Other scheduler families are not demonstrated. |
 | 5. Shared PM/QA/DevOps handoff | Stable patch digest, separate baseline/replay, required/executed counts, installation/runner policy digest, draft wording inventory and precise delivery status | PASS for generated local handoff evidence. Exact wording approval, remote fork CI and collaborative human sign-off remain NOT_RUN. |
 
@@ -43,9 +43,20 @@ Opus's supplied independent re-review of `a92e3b5` reports Python 3.12 selection
 
 ## Remaining acceptance evidence
 
-1. Perform the exact `[999]` clean Cursor run from a clone of the reviewed fork `ramp-base` on a host without the kit repository, using `START_HERE.md` and record it in `CURSOR-REHEARSAL.md`, including workspace/rule screenshot, initial Git status/stashes, model/version, timings/interventions and every result/log.
+1. Perform the clean Cursor run with the fresh task and on the evaluation installation agreed in alex-16moro/diffusers-ramp-kit#4. Record it in `CURSOR-REHEARSAL.md`: workspace and rule screenshot, initial Git status and stashes, model and version, timings, interventions, and every result and log. *Superseded (3 October 2026):* the original plan was the `[999]` request from a `ramp-base` clone. That request is retired because the installed kit contains its worked example, and `ramp-base` now contains a merged fixture solution.
 2. Keep the exploratory fallback variant separate. Demonstrate the announced DDPM-only staged failure after the clean run in another disposable checkout.
-3. `ramp-base` is published on the user-owned Diffusers fork at `961cf0f` (kit `f3e7d28`; see CURSOR-REHEARSAL.md). Next, run a real contribution PR against it. Record its Actions URL/conclusion, base/head SHAs and patch digest matching the local contribution. Publishing this kit PR does not imply that the separate fork was modified or verified.
+3. `ramp-base` was published on the user-owned Diffusers fork at `961cf0f` (kit `f3e7d28`), but the fixture PR #23 was later merged into it. It now sits at `9c3a9d1` and is preserved for history only. A real contribution PR has run through fork CI as a coached, assisted rehearsal (alex-16moro/diffusers#25 on `ramp-demo`, run 35981794009, patch digest `02c34f99…` equal locally and in CI). The clean-acceptance PR, with full revision provenance, remains pending. Publishing a kit PR does not imply that the fork was modified or verified.
 4. Packaged evidence under `deliverables/` and `review-checks/` was generated with kit `f3e7d28`. The `WRONG_BASE`/`ATTACH_CONFLICT` message change moves the kit digest to `71a070b`; regenerate evidence with `scripts/reproduce.py` and `scripts/export_evidence.py` before merging it, and upgrade `ramp-base` only as an explicit, reviewed kit upgrade.
 
 No container isolation, extra agents, MCP, database, hooks, expanded scheduler recipe or packaging automation was added. Business improvement remains a measurement hypothesis, not an observed time-saving claim.
+
+## Status update (3 October 2026)
+
+Coordination for the next round is in alex-16moro/diffusers-ramp-kit#4. Kit changes are in draft PRs (#5, #6 and later), and none is merged. Agreed sequence:
+1. Harden and validate the existing workflow.
+2. Run a fresh task within the scheduler-validation recipe.
+3. Complete clean Cursor acceptance.
+4. Only then add a second recipe.
+
+Packaged evidence and `CONTENTS.sha256` are regenerated once, against the agreed final revision, after integration review. Until then the kit repository's `unit` job reports manifest mismatches on changed files, and these are disclosed in each PR.
+
