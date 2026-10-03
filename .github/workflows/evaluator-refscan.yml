@@ -1,0 +1,58 @@
+name: Evaluator ref scan after owner cleanup
+on:
+  push:
+    branches: [codex/evaluator-refscan-after-cleanup]
+permissions:
+  contents: read
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Capture and scan all fork refs
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/scan"
+          cd "$RUNNER_TEMP/scan"
+          git init -q
+          date -u +%Y-%m-%dT%H:%M:%SZ > scan-time.txt
+          git ls-remote https://github.com/alex-16moro/diffusers.git > refs-before-run.txt
+          if grep -E 'refs/heads/ramp-fixture/(provenance-base|provenance-empty-timesteps)$' refs-before-run.txt; then
+            echo "BLOCKED: fixture branches still advertised"
+            exit 1
+          fi
+          git fetch -q https://github.com/alex-16moro/diffusers.git '+refs/heads/*:refs/scan/heads/*' '+refs/pull/*/head:refs/scan/pull/*'
+          python3 - <<'PY'
+          import json,re,subprocess
+          from pathlib import Path
+          pin="0121a91f9d419ff7234c8a5923f82c244e6f1914"
+          files=["src/diffusers/schedulers/scheduling_ddpm.py","src/diffusers/schedulers/scheduling_ddpm_parallel.py","tests/schedulers/test_scheduler_ddpm.py","tests/schedulers/test_scheduler_ddpm_parallel.py"]
+          refs=subprocess.check_output(["git","for-each-ref","--format=%(refname)","refs/scan"],text=True).splitlines()
+          pattern=re.compile(r"^\+.*(num_inference_steps[^=]*(<=|<|==) *[01]\b|must be (a )?positive|greater than (0|zero)|at least (1|one))",re.M)
+          mention=re.compile(r"zero[- ]?(inference[- ]?)?steps|num_inference_steps *= *0",re.I)
+          hits=[]
+          rows=[]
+          for ref in refs:
+              diff=subprocess.check_output(["git","diff",pin,ref,"--",*files],text=True)
+              matches=[m.group(0) for m in pattern.finditer(diff)]
+              sha=subprocess.check_output(["git","rev-parse",ref],text=True).strip()
+              rows.append({"ref":ref,"sha":sha,"hits":matches})
+              if matches: hits.append({"ref":ref,"lines":matches})
+          commits=subprocess.check_output(["git","log","--format=%H %s%n%b","^"+pin,*refs],text=True)
+          mentions=[line for line in commits.splitlines() if mention.search(line)]
+          pull_sha=subprocess.check_output(["git","rev-parse","refs/scan/pull/26"],text=True).strip()
+          assert pull_sha=="6af84730e07121208946de0ca1fe0ac4be214a03"
+          record={"timestamp_utc":Path("scan-time.txt").read_text().strip(),"advertised_ref_count":len(Path("refs-before-run.txt").read_text().splitlines()),"scanned_branch_and_pr_head_refs":len(refs),"fixture_branches_absent":True,"hits":hits,"mentions":mentions,"accepted_mention":{"ref":"refs/pull/26/head","sha":pull_sha,"owner_decision":"Owner accepts the task-name mention; the closed fixture carries no zero-steps solution. Preserved per #4.","classification":"MENTION, not acceptance evidence"},"launch_status":"NOT_LAUNCHED; repeat the scan immediately before clean Cursor launch","refs":rows}
+          Path("ref-scan.json").write_text(json.dumps(record,indent=2)+"\n")
+          print(Path("refs-before-run.txt").read_text())
+          print(json.dumps(record,indent=2))
+          if hits: raise SystemExit("BLOCKED: solution HIT")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evaluator-ref-scan-after-cleanup
+          path: |
+            ${{ runner.temp }}/scan/refs-before-run.txt
+            ${{ runner.temp }}/scan/scan-time.txt
+            ${{ runner.temp }}/scan/ref-scan.json
