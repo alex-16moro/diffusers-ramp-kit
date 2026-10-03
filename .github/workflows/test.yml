@@ -13,6 +13,15 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s tests -v
+  manifest:
+    # Separate from unit so that expected manifest drift on in-progress PRs is
+    # never mistaken for a test failure. The check stays complete and blocking:
+    # final acceptance requires this job green after the single regeneration.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: sha256sum -c CONTENTS.sha256
   integration:
     runs-on: ubuntu-24.04
