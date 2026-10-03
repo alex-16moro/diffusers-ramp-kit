@@ -60,7 +60,7 @@ def safe_path(root: Path, relative: str) -> Path:
 
 
 def git(repo: Path, *args: str) -> bytes:
-    result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True)
+    result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, env=runtime_env(repo))
     if result.returncode:
         raise RampError(f"git {' '.join(args)} failed: {result.stderr.decode(errors='replace').strip()}")
     return result.stdout
@@ -101,9 +101,22 @@ def task_dir(repo: Path, task_id: str) -> Path:
 def validate_task(task: dict, prof: dict):
     if not isinstance(task, dict):
         raise RampError("Task must be a JSON object.")
-    required = ("id", "title", "request", "recipe", "editable_files", "criteria", "regression_test")
+    required = (
+        "id",
+        "title",
+        "request",
+        "recipe",
+        "editable_files",
+        "criteria",
+        "regression_test",
+        "baseline_error",
+    )
     if any(not task.get(key) for key in required):
         raise RampError(f"Task requires nonempty fields: {', '.join(required)}")
+    if not isinstance(task["baseline_error"], str) or not re.fullmatch(
+        r"[A-Za-z_][A-Za-z0-9_]*", task["baseline_error"]
+    ):
+        raise RampError("baseline_error must name the observed implementation exception class.")
     task_dir(Path.cwd(), task["id"])
     if task.get("base_sha", prof["base_sha"]) != prof["base_sha"]:
         raise RampError("Task baseline differs from the installed profile; refresh the task with its owner.")
@@ -156,6 +169,15 @@ def context(repo: Path, relative: str, symbol: str | None = None) -> dict:
                 raise RampError(f"Missing symbol {symbol} in {relative}; refresh the profile.")
             nodes = getattr(found, "body", [])
         start, end = found.lineno, found.end_lineno
+        decorators = getattr(found, "decorator_list", [])
+        if decorators:
+            start = min(start, *(node.lineno for node in decorators))
+        # AST line ranges omit the upstream copy relationship immediately above a symbol.
+        preceding = start - 2
+        while preceding >= 0 and (not lines[preceding].strip() or lines[preceding].lstrip().startswith("#")):
+            if lines[preceding].lstrip().startswith("# Copied from "):
+                start = preceding + 1
+            preceding -= 1
     return {
         "path": relative,
         "start_line": start,
@@ -173,12 +195,16 @@ def require_pinned_base(repo: Path, base: str):
         "or to a branch carrying an earlier overlay."
     )
     present = subprocess.run(
-        ["git", "-C", str(repo), "cat-file", "-e", f"{base}^{{commit}}"], capture_output=True
+        ["git", "-C", str(repo), "cat-file", "-e", f"{base}^{{commit}}"],
+        capture_output=True,
+        env=runtime_env(repo),
     )
     if present.returncode:
         raise RampError(f"WRONG_BASE: pinned commit {base[:12]} is not present in this checkout. {guidance}")
     result = subprocess.run(
-        ["git", "-C", str(repo), "merge-base", "--is-ancestor", base, "HEAD"], capture_output=True
+        ["git", "-C", str(repo), "merge-base", "--is-ancestor", base, "HEAD"],
+        capture_output=True,
+        env=runtime_env(repo),
     )
     if result.returncode == 1:
         fork_point = git(repo, "merge-base", base, "HEAD").decode().strip()
@@ -507,7 +533,10 @@ def policy_provenance(repo: Path) -> dict:
 def scope_findings(repo: Path, task: dict) -> list[dict]:
     managed = attachment(repo)["files"]
     findings = []
-    for relative in changed(repo, task["base_sha"]):
+    tracked = set(git(repo, "ls-files", "-z").decode().split("\0"))
+    inputs = execution_inputs(repo)
+    unexpected = inputs - tracked - set(task["editable_files"])
+    for relative in sorted(set(changed(repo, task["base_sha"])) | unexpected):
         if relative.startswith(".ramp/"):
             continue
         path = safe_path(repo, relative)
@@ -531,8 +560,33 @@ def scope_findings(repo: Path, task: dict) -> list[dict]:
     return findings
 
 
+def execution_inputs(repo: Path) -> set[str]:
+    """Inventory source, test data/helpers and tools, including Git-ignored additions.
+
+    Runtime caches are excluded; installed dependency versions are recorded separately.
+    This is a reproducibility boundary, not isolation from arbitrary repository code.
+    """
+    excluded = {"__pycache__", ".pytest_cache", ".ruff_cache"}
+    paths = set()
+    for name in ("src", "tests", "utils"):
+        root = repo / name
+        if root.is_symlink():
+            raise RampError(f"Symlink not permitted: {name}")
+        for directory, subdirs, files in os.walk(root, followlinks=False):
+            for subdir in subdirs:
+                path = Path(directory) / subdir
+                if path.is_symlink():
+                    raise RampError(f"Symlink not permitted: {path.relative_to(repo)}")
+            subdirs[:] = [name for name in subdirs if name not in excluded and not name.endswith(".egg-info")]
+            paths.update(str((Path(directory) / name).relative_to(repo)) for name in files)
+    for path in repo.iterdir():
+        if path.suffix in {".py", ".ini", ".cfg", ".toml"} or path.name == "Makefile":
+            paths.add(path.name)
+    return paths
+
+
 def fingerprint(repo: Path, task: dict) -> str:
-    paths = set(changed(repo, task["base_sha"])) | set(profile()["sources"])
+    paths = set(changed(repo, task["base_sha"])) | set(profile()["sources"]) | execution_inputs(repo)
     contents = []
     for relative in sorted(paths):
         if relative.startswith(".ramp/"):
@@ -551,6 +605,7 @@ def fingerprint(repo: Path, task: dict) -> str:
                 "kit": kit_hash(),
                 "python": sys.version,
                 "packages": packages,
+                "execution_environment": runtime_env(repo),
                 "base": task["base_sha"],
             }
         )
@@ -598,10 +653,27 @@ def diagnostic(repo: Path, task: dict) -> list[dict]:
 
 
 def runtime_env(repo: Path) -> dict:
-    env = os.environ.copy()
+    # Inherited pytest/Python overrides can change what a check runs. Keep only
+    # platform essentials, then set the runner's explicit execution contract.
+    inherited = {
+        "HOME",
+        "USERPROFILE",
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "TMPDIR",
+        "TMP",
+        "TEMP",
+        "LANG",
+        "TZ",
+        "LD_LIBRARY_PATH",
+        "DYLD_LIBRARY_PATH",
+    }
+    env = {key: value for key, value in os.environ.items() if key in inherited or key.startswith("LC_")}
     env.update(
         {
-            "PATH": str(Path(sys.executable).parent) + os.pathsep + env.get("PATH", ""),
+            "PATH": str(Path(sys.executable).parent) + os.pathsep + os.defpath,
             "PYTHONPATH": str(repo / "src"),
             "HF_HUB_OFFLINE": "1",
             "TRANSFORMERS_OFFLINE": "1",
@@ -610,6 +682,7 @@ def runtime_env(repo: Path) -> dict:
             "MKL_NUM_THREADS": "1",
             "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
             "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONNOUSERSITE": "1",
         }
     )
     return env
@@ -701,13 +774,13 @@ def expected_regression(check: dict, task: dict) -> bool:
     if len(tests) != 1 or tests[0]["status"] != "FAIL" or check.get("exit_code") != 1:
         return False
     detail = tests[0].get("detail", "")
-    return detail.startswith(task.get("baseline_error", "IndexError") + ":") and any(
+    return detail.startswith(task["baseline_error"] + ":") and any(
         path in detail for path in profile()["implementation_files"]
     )
 
 
 def regression_failure(check: dict, task: dict) -> str:
-    expected = task.get("baseline_error", "IndexError")
+    expected = task["baseline_error"]
     tests = check.get("tests", [])
     if check.get("status") == "ERROR":
         return "REGRESSION_EXECUTION_ERROR: inspect collection/import/runtime errors in the regression log."
@@ -792,7 +865,8 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
         if not (directory / "architecture.json").exists():
             raise RampError(
                 f"No architecture assessment recorded for {task_id}; run assess {task_id} "
-                "--decision COMPATIBLE --rationale <source-grounded-rationale> --source <approved-path> "
+                "--decision <decision> --rationale <source-grounded-rationale> --source <approved-path> "
+                "(allowed decisions: COMPATIBLE | REVISE | NEEDS_MAINTAINER) "
                 "before verifying. Assess the proposal before choosing a decision."
             )
         validate_assessment(repo, task, review)
