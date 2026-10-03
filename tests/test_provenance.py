@@ -50,7 +50,7 @@ class ProvenanceTests(unittest.TestCase):
         git(self.candidate, *COMMIT, "contribution")
         self.head = git(self.candidate, "rev-parse", "HEAD")
         git(self.candidate, "switch", "-q", "--detach", self.base)
-        git(self.candidate, "merge", "-q", "--no-ff", "--no-edit", self.head)
+        git(self.candidate, *COMMIT[:4], "merge", "-q", "--no-ff", "--no-edit", self.head)
         self.merge = git(self.candidate, "rev-parse", "HEAD")
         record = {
             "status": "PASS",
