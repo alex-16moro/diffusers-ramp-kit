@@ -1,7 +1,9 @@
 import contextlib
 import copy
 import io
+import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -47,6 +49,7 @@ class WorkflowTests(unittest.TestCase):
             "recipe": "scheduler-input-validation",
             "editable_files": [self.source, self.tests],
             "regression_test": self.tests + "::Tests::test_empty",
+            "baseline_error": "IndexError",
             "criteria": [
                 {"id": "AC1", "text": "Raises ValueError", "tests": [self.tests + "::Tests::test_empty"]}
             ],
@@ -93,6 +96,111 @@ class WorkflowTests(unittest.TestCase):
     def test_invalid_base_never_means_no_changes(self):
         with self.assertRaises(core.RampError):
             core.changed(self.repo, "invalid-base")
+
+    def test_context_includes_copy_marker_and_decorator(self):
+        (self.repo / self.source).write_text(
+            "class Scheduler:\n"
+            "    # Copied from upstream.Scheduler.step\n"
+            "    @decorator\n"
+            "    def step(self):\n"
+            "        return 1\n"
+            "    def unrelated(self):\n"
+            "        return 2\n"
+        )
+        result = core.context(self.repo, self.source, "Scheduler.step")
+        self.assertEqual(result["start_line"], 2)
+        self.assertEqual(result["end_line"], 5)
+        self.assertIn("# Copied from upstream.Scheduler.step", result["content"])
+        self.assertIn("@decorator", result["content"])
+        self.assertNotIn("unrelated", result["content"])
+
+    def test_ignored_execution_inputs_invalidate_evidence_and_block_scope(self):
+        (self.repo / ".gitignore").write_text("conftest.py\nhelper.py\nfixture.dat\n")
+        self.git("add", ".gitignore")
+        self.git(
+            "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "ignore"
+        )
+        self.task["base_sha"] = self.git("rev-parse", "HEAD").strip()
+        first = core.fingerprint(self.repo, self.task)
+        for relative in ("conftest.py", "tests/helper.py", "src/fixture.dat", "utils/helper.py"):
+            with self.subTest(relative=relative):
+                path = self.repo / relative
+                path.parent.mkdir(exist_ok=True)
+                path.write_text("harmless first input\n")
+                self.assertNotIn(relative, core.changed(self.repo, self.task["base_sha"]))
+                second = core.fingerprint(self.repo, self.task)
+                self.assertNotEqual(first, second)
+                self.assertTrue(
+                    any(f.get("path") == relative for f in core.scope_findings(self.repo, self.task))
+                )
+                path.write_text("harmless revised input\n")
+                self.assertNotEqual(second, core.fingerprint(self.repo, self.task))
+                path.unlink()
+                self.assertEqual(first, core.fingerprint(self.repo, self.task))
+
+    def test_execution_caches_and_evidence_do_not_invalidate_fingerprint(self):
+        (self.repo / ".gitignore").write_text("__pycache__/\n.pytest_cache/\n.ramp-venv/\n.ramp/\n")
+        self.git("add", ".gitignore")
+        self.git(
+            "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "ignore"
+        )
+        first = core.fingerprint(self.repo, self.task)
+        for relative in (
+            "tests/__pycache__/test.pyc",
+            "tests/.pytest_cache/lastfailed",
+            ".ramp-venv/state",
+            ".ramp/task/runs/output",
+        ):
+            path = self.repo / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("runtime output")
+        self.assertEqual(first, core.fingerprint(self.repo, self.task))
+
+    def test_execution_environment_is_controlled_and_fingerprinted(self):
+        hostile = {
+            "PYTEST_ADDOPTS": "--collect-only",
+            "PYTEST_PLUGINS": "helper",
+            "PYTHONHOME": "/other",
+            "PATH": "/other",
+        }
+        first = core.fingerprint(self.repo, self.task)
+        with patch.dict(os.environ, hostile):
+            env = core.runtime_env(self.repo)
+            for key in ("PYTEST_ADDOPTS", "PYTEST_PLUGINS", "PYTHONHOME"):
+                self.assertTrue(key not in env, f"Unexpected inherited override: {key}")
+            self.assertNotIn("/other", env["PATH"])
+            self.assertEqual(env["PYTHONNOUSERSITE"], "1")
+            self.assertEqual(first, core.fingerprint(self.repo, self.task))
+        with patch.dict(os.environ, {"TMPDIR": "/different-temp"}):
+            self.assertNotEqual(first, core.fingerprint(self.repo, self.task))
+
+    def test_check_subprocess_uses_controlled_environment(self):
+        with patch.dict(
+            os.environ, {"PYTHONHOME": "/missing-python-home", "PYTEST_ADDOPTS": "--collect-only"}
+        ):
+            result = core.run_check(
+                self.repo,
+                self.directory / "runs",
+                "environment-probe",
+                [
+                    sys.executable,
+                    "-c",
+                    "import os; assert 'PYTEST_ADDOPTS' not in os.environ; assert os.environ['PYTHONNOUSERSITE'] == '1'; print('executed')",
+                ],
+            )
+        self.assertEqual(result["status"], "PASS")
+        self.assertIn("executed", (self.directory / "runs/environment-probe.log").read_text())
+
+    def test_baseline_error_must_be_explicit_exception_name(self):
+        for value in (None, "", [], "IndexError: guessed"):
+            with self.subTest(value=value):
+                invalid = dict(self.task, baseline_error=value)
+                with self.assertRaises(core.RampError):
+                    core.validate_task(invalid, self.profile)
+        invalid = dict(self.task)
+        del invalid["baseline_error"]
+        with self.assertRaisesRegex(core.RampError, "baseline_error"):
+            core.validate_task(invalid, self.profile)
 
     def test_deletion_detected(self):
         (self.repo / self.source).unlink()
@@ -204,6 +312,8 @@ class WorkflowTests(unittest.TestCase):
         message = next(f["message"] for f in result["findings"] if f["rule"] == "DESIGN")
         self.assertIn("No architecture assessment recorded", message)
         self.assertIn("assess task", message)
+        self.assertIn("COMPATIBLE | REVISE | NEEDS_MAINTAINER", message)
+        self.assertNotIn("--decision COMPATIBLE", message)
 
     def test_missing_approved_citation_has_actionable_error(self):
         record = core.load(self.directory / "architecture.json")
