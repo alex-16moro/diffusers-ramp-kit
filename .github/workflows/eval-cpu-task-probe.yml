@@ -1,0 +1,33 @@
+name: Evaluator probe (not part of the kit)
+on:
+  push:
+    branches: [claude/eval-cpu-task-probe]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch pinned source
+        run: |
+          git init "$RUNNER_TEMP/source"
+          git -C "$RUNNER_TEMP/source" remote add origin https://github.com/huggingface/diffusers.git
+          git -C "$RUNNER_TEMP/source" fetch --depth=1 origin 0121a91f9d419ff7234c8a5923f82c244e6f1914
+          git -C "$RUNNER_TEMP/source" checkout --detach FETCH_HEAD
+      - name: Supported environment via the kit bootstrap
+        run: PYTHON=python bash runtime/bootstrap.sh "$RUNNER_TEMP/source"
+      - name: Behaviour matrix at the pin
+        run: |
+          cd "$RUNNER_TEMP/source"
+          HF_HUB_OFFLINE=1 .ramp-venv/bin/python "$GITHUB_WORKSPACE/.github/eval-probe/zero_steps_matrix.py"
+      - name: Existing DDPM test modules at the pin
+        run: |
+          cd "$RUNNER_TEMP/source"
+          HF_HUB_OFFLINE=1 .ramp-venv/bin/python -m pytest -q -p no:cacheprovider tests/schedulers/test_scheduler_ddpm.py tests/schedulers/test_scheduler_ddpm_parallel.py 2>&1 | tail -5
