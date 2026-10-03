@@ -547,7 +547,11 @@ def scope_findings(repo: Path, task: dict) -> list[dict]:
             continue
         elif relative not in task["editable_files"]:
             findings.append(
-                {"rule": "SCOPE", "path": relative, "message": "Change outside the task's editable paths."}
+                {
+                    "rule": "SCOPE",
+                    "path": relative,
+                    "message": "Change outside the task's editable paths. Remove untracked execution inputs or restore unrelated edits; do not expand task scope.",
+                }
             )
         elif not path.is_file():
             findings.append(
@@ -1024,7 +1028,10 @@ def readiness(repo: Path, task: dict) -> dict:
             "Malformed candidate record: expected fingerprint and status; rerun verify.",
         )
     elif candidate["fingerprint"] != fingerprint(repo, task):
-        status, reason = "STALE", "Code, policy, requirements or assessment changed; rerun verification."
+        status, reason = (
+            "STALE",
+            "Execution inputs or environment, policy, requirements or assessment changed; rerun verification.",
+        )
     elif candidate.get("level") not in ("fast", "full"):
         status, reason = "INCOMPLETE", "Malformed candidate level; rerun verify."
     elif candidate["status"] != "PASS":
