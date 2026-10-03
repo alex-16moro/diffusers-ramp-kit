@@ -1,10 +1,10 @@
 {
   "status": "ONBOARDING_READY",
-  "checkout": "/workspace/scratch/306c018f6a72/rereview-integration",
+  "checkout": "/home/runner/work/_temp/rehearsal",
   "attachment": {
     "status": "ATTACHED",
-    "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
-    "files_added": 21,
+    "kit_sha256": "16d709dae20a9bd50d013a8c619ebe454cf043bf4e02d47ffd837e7b653f2dca",
+    "files_added": 26,
     "next_action": "Open this checkout in a fresh Cursor session and describe the task."
   },
   "next_action": "Platform owner: review and commit the installation on ramp-base, then publish it to the approved fork following RELEASE.md. The engineer clones only ramp-base on a separate host without the kit repository or solution evidence, bootstraps, and opens that clone in Cursor (START_HERE.md)."

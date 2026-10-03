@@ -3,18 +3,18 @@
     "name": "cold-bootstrap",
     "command": [
       "bash",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/runtime/bootstrap.sh",
-      "/workspace/scratch/306c018f6a72/rereview-integration"
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/runtime/bootstrap.sh",
+      "/home/runner/work/_temp/rehearsal"
     ],
     "exit_code": 0
   },
   {
     "name": "doctor",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/home/runner/work/_temp/rehearsal",
       "doctor"
     ],
     "exit_code": 0
@@ -60,18 +60,18 @@
       "--branch",
       "ramp-base",
       "--no-tags",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
-      "/workspace/scratch/306c018f6a72/rereview-integration-policy"
+      "/home/runner/work/_temp/rehearsal",
+      "/home/runner/work/_temp/rehearsal-policy"
     ],
     "exit_code": 0
   },
   {
     "name": "fresh-clone-doctor",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration-policy/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal-policy/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration-policy",
+      "/home/runner/work/_temp/rehearsal-policy",
       "doctor"
     ],
     "exit_code": 0
@@ -89,23 +89,23 @@
   {
     "name": "prepare",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/home/runner/work/_temp/rehearsal",
       "prepare",
       "--spec",
-      "/workspace/scratch/306c018f6a72/ramp-kit-rereview/examples/empty-timesteps.json"
+      "/home/runner/work/diffusers-ramp-kit/diffusers-ramp-kit/examples/empty-timesteps.json"
     ],
     "exit_code": 0
   },
   {
     "name": "assess",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/home/runner/work/_temp/rehearsal",
       "assess",
       "empty-timesteps",
       "--decision",
@@ -127,17 +127,17 @@
       "git",
       "apply",
       "--include=tests/schedulers/test_scheduler_ddpm.py",
-      "/workspace/scratch/306c018f6a72/ramp-kit-rereview/tests/fixtures/contribution.patch"
+      "/home/runner/work/diffusers-ramp-kit/diffusers-ramp-kit/tests/fixtures/contribution.patch"
     ],
     "exit_code": 0
   },
   {
     "name": "baseline",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/home/runner/work/_temp/rehearsal",
       "verify",
       "empty-timesteps",
       "--phase",
@@ -151,17 +151,17 @@
       "git",
       "apply",
       "--exclude=tests/schedulers/test_scheduler_ddpm.py",
-      "/workspace/scratch/306c018f6a72/ramp-kit-rereview/tests/fixtures/contribution.patch"
+      "/home/runner/work/diffusers-ramp-kit/diffusers-ramp-kit/tests/fixtures/contribution.patch"
     ],
     "exit_code": 0
   },
   {
     "name": "local-full",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/home/runner/work/_temp/rehearsal",
       "verify",
       "empty-timesteps",
       "--level",
@@ -172,10 +172,10 @@
   {
     "name": "local-report",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
+      "/home/runner/work/_temp/rehearsal",
       "report",
       "empty-timesteps"
     ],
@@ -214,8 +214,8 @@
       "git",
       "clone",
       "--no-hardlinks",
-      "/workspace/scratch/306c018f6a72/rereview-integration",
-      "/workspace/scratch/306c018f6a72/rereview-integration-candidate"
+      "/home/runner/work/_temp/rehearsal",
+      "/home/runner/work/_temp/rehearsal-candidate"
     ],
     "exit_code": 0
   },
@@ -235,7 +235,7 @@
       "git",
       "diff",
       "--exit-code",
-      "1903c4f1a5472341caaa461f280ccce59b4a7939",
+      "8eb875358bc07f7156aa2ca96b1b9a9738dcda06",
       "--",
       "setup.py",
       "pyproject.toml"
@@ -245,10 +245,10 @@
   {
     "name": "simulated-ci-full",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration-policy/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal-policy/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration-candidate",
+      "/home/runner/work/_temp/rehearsal-candidate",
       "verify",
       "empty-timesteps",
       "--level",
@@ -259,10 +259,10 @@
   {
     "name": "simulated-ci-report",
     "command": [
-      "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
-      "/workspace/scratch/306c018f6a72/rereview-integration-policy/.ramp-kit/run.py",
+      "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
+      "/home/runner/work/_temp/rehearsal-policy/.ramp-kit/run.py",
       "--repo",
-      "/workspace/scratch/306c018f6a72/rereview-integration-candidate",
+      "/home/runner/work/_temp/rehearsal-candidate",
       "report",
       "empty-timesteps"
     ],

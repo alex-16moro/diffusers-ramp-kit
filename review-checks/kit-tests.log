@@ -1,18 +1,43 @@
+{
+  "status": "ATTACHED",
+  "kit_sha256": "16d709dae20a9bd50d013a8c619ebe454cf043bf4e02d47ffd837e7b653f2dca",
+  "files_added": 27,
+  "next_action": "Open this checkout in a fresh Cursor session and describe the task."
+}
+test_broken_managed_environment_is_replaced (test_bootstrap.BootstrapTests.test_broken_managed_environment_is_replaced) ... ok
 test_default_interpreter_and_missing_venv_diagnostic (test_bootstrap.BootstrapTests.test_default_interpreter_and_missing_venv_diagnostic) ... ok
 test_explicit_missing_interpreter_has_actionable_message (test_bootstrap.BootstrapTests.test_explicit_missing_interpreter_has_actionable_message) ... ok
+test_missing_ensurepip_falls_back_to_venv_without_pip (test_bootstrap.BootstrapTests.test_missing_ensurepip_falls_back_to_venv_without_pip) ... ok
+test_symlinked_environment_is_not_replaced (test_bootstrap.BootstrapTests.test_symlinked_environment_is_not_replaced) ... ok
+test_unrecognised_environment_directory_is_preserved (test_bootstrap.BootstrapTests.test_unrecognised_environment_directory_is_preserved) ... ok
+test_usable_symlinked_environment_is_not_written_through (test_bootstrap.BootstrapTests.test_usable_symlinked_environment_is_not_written_through) ... ok
 test_assertion_free_candidate_cannot_reach_ready (test_core.WorkflowTests.test_assertion_free_candidate_cannot_reach_ready) ... ok
+test_assessment_consumption_validates_citations (test_core.WorkflowTests.test_assessment_consumption_validates_citations) ... ok
 test_attach_idempotence_and_tamper_detection (test_core.WorkflowTests.test_attach_idempotence_and_tamper_detection) ... ok
+test_attach_names_every_conflict_from_another_installation (test_core.WorkflowTests.test_attach_names_every_conflict_from_another_installation) ... ok
+test_baseline_error_must_be_explicit_exception_name (test_core.WorkflowTests.test_baseline_error_must_be_explicit_exception_name) ... ok
 test_baseline_failure_reasons_and_exit_contract (test_core.WorkflowTests.test_baseline_failure_reasons_and_exit_contract) ... ok
 test_broad_exception_swallowing_diagnostic (test_core.WorkflowTests.test_broad_exception_swallowing_diagnostic) ... ok
+test_check_subprocess_uses_controlled_environment (test_core.WorkflowTests.test_check_subprocess_uses_controlled_environment) ... ok
+test_checkout_not_built_on_pin_is_explained (test_core.WorkflowTests.test_checkout_not_built_on_pin_is_explained) ... ok
 test_constant_only_assertions_cannot_reach_ready (test_core.WorkflowTests.test_constant_only_assertions_cannot_reach_ready) ... ok
 test_context_allowlist_and_symbol (test_core.WorkflowTests.test_context_allowlist_and_symbol) ... ok
+test_context_includes_copy_marker_and_decorator (test_core.WorkflowTests.test_context_includes_copy_marker_and_decorator) ... ok
 test_deletion_detected (test_core.WorkflowTests.test_deletion_detected) ... ok
 test_empty_and_raise_only_mapped_tests_are_rejected (test_core.WorkflowTests.test_empty_and_raise_only_mapped_tests_are_rejected) ... ok
 test_evidence_changes_with_code_and_requirement (test_core.WorkflowTests.test_evidence_changes_with_code_and_requirement) ... ok
+test_execution_caches_and_evidence_do_not_invalidate_fingerprint (test_core.WorkflowTests.test_execution_caches_and_evidence_do_not_invalidate_fingerprint) ... ok
+test_execution_environment_is_controlled_and_fingerprinted (test_core.WorkflowTests.test_execution_environment_is_controlled_and_fingerprinted) ... ok
 test_existing_test_filename_selected (test_core.WorkflowTests.test_existing_test_filename_selected) ... ok
 test_fresh_onboarding_excludes_solution_and_credentials (test_core.WorkflowTests.test_fresh_onboarding_excludes_solution_and_credentials) ... ok
+test_ignored_execution_inputs_invalidate_evidence_and_block_scope (test_core.WorkflowTests.test_ignored_execution_inputs_invalidate_evidence_and_block_scope) ... ok
+test_incomplete_compatible_assessment_stops_execution (test_core.WorkflowTests.test_incomplete_compatible_assessment_stops_execution) ... ok
+test_inconsistent_success_record_is_not_ready (test_core.WorkflowTests.test_inconsistent_success_record_is_not_ready) ... ok
 test_invalid_base_never_means_no_changes (test_core.WorkflowTests.test_invalid_base_never_means_no_changes) ... ok
+test_malformed_candidate_is_incomplete (test_core.WorkflowTests.test_malformed_candidate_is_incomplete) ... ok
 test_mapped_test_cannot_be_missing_from_successful_result (test_core.WorkflowTests.test_mapped_test_cannot_be_missing_from_successful_result) ... ok
+test_missing_approved_citation_has_actionable_error (test_core.WorkflowTests.test_missing_approved_citation_has_actionable_error) ... ok
+test_missing_assessment_explains_how_to_record_it (test_core.WorkflowTests.test_missing_assessment_explains_how_to_record_it) ... ok
 test_missing_test_report_is_execution_error (test_core.WorkflowTests.test_missing_test_report_is_execution_error) ... ok
 test_normal_commit_and_clone_preserves_entire_attachment (test_core.WorkflowTests.test_normal_commit_and_clone_preserves_entire_attachment) ... ok
 test_old_green_report_is_stale (test_core.WorkflowTests.test_old_green_report_is_stale) ... ok
@@ -38,8 +63,22 @@ test_task_cannot_replace_pinned_base (test_core.WorkflowTests.test_task_cannot_r
 test_traversal_rejected (test_core.WorkflowTests.test_traversal_rejected) ... ok
 test_unmapped_acceptance_criterion_rejected (test_core.WorkflowTests.test_unmapped_acceptance_criterion_rejected) ... ok
 test_untracked_out_of_scope_detected (test_core.WorkflowTests.test_untracked_out_of_scope_detected) ... ok
+test_verify_record_is_ready_and_repair_reasons_are_specific (test_core.WorkflowTests.test_verify_record_is_ready_and_repair_reasons_are_specific) ... ok
+test_branch_without_installation (test_install.CloudSetupScriptTests.test_branch_without_installation) ... ok
+test_legacy_ramp_kit_path_refuses_both_phases (test_install.CloudSetupScriptTests.test_legacy_ramp_kit_path_refuses_both_phases) ... ok
+test_unknown_phase (test_install.CloudSetupScriptTests.test_unknown_phase) ... ok
+test_cloud_setup_files_survive_commit_and_clone (test_install.InstallationTests.test_cloud_setup_files_survive_commit_and_clone) ... ok
+test_evaluator_protocol_is_never_installed (test_install.InstallationTests.test_evaluator_protocol_is_never_installed) ... ok
+test_invalid_publication_targets_change_nothing (test_install.InstallationTests.test_invalid_publication_targets_change_nothing) ... ok
+test_nested_publication_branch_is_accepted (test_install.InstallationTests.test_nested_publication_branch_is_accepted) ... ok
+test_publication_target_is_recorded_and_protected (test_install.InstallationTests.test_publication_target_is_recorded_and_protected) ... ok
+test_publication_target_without_flags_is_absent (test_install.InstallationTests.test_publication_target_without_flags_is_absent) ... ok
+test_failed_or_missing_verification_still_records_revisions (test_provenance.ProvenanceTests.test_failed_or_missing_verification_still_records_revisions) ... ok
+test_inconsistent_revisions_are_reported_not_hidden (test_provenance.ProvenanceTests.test_inconsistent_revisions_are_reported_not_hidden) ... ok
+test_records_every_agreed_field (test_provenance.ProvenanceTests.test_records_every_agreed_field) ... ok
+test_workflow_runs_recorder_from_policy_after_verification (test_provenance.ProvenanceTests.test_workflow_runs_recorder_from_policy_after_verification) ... ok
 
 ----------------------------------------------------------------------
-Ran 40 tests in 3.267s
+Ran 73 tests in 3.983s
 
 OK

@@ -1,0 +1,10 @@
+{
+  "source_revision": "b54a0aa9bc3b8882492dc58919e77badc78a5fe7",
+  "evidence_run_id": "37108311453",
+  "evidence_artifact_id": 11269050634,
+  "evidence_archive_sha256": "b02ee6a2caf17764a6216f933d1fe44b99ced67f85c559c937afa5889096df5d",
+  "export_run_id": "37109880111",
+  "export_run_attempt": "1",
+  "execution": "Existing successful Linux fixture rehearsal from the exact source; exported once on Linux x86-64/Python 3.12/torch 2.7.1+cpu. Not clean Cursor acceptance.",
+  "fixture_ref_scan": "PENDING owner deletion confirmation; preserve accepted refs/pull/26/head mention"
+}

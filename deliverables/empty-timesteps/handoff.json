@@ -1,10 +1,10 @@
 {
   "status": "READY_FOR_HUMAN_REVIEW",
-  "fingerprint": "d26c02d48fb16322b9cb6a476d0762021b89cfbd3d6edf484491b409dd2d8e3b",
+  "fingerprint": "4af89afba76fd563adfdf268a545b373c83ac676ede7e79debf852ba8e671202",
   "patch_sha256": "5380733056ba1589e9cfebe911013967d661c8c25102c4443833847587462995",
   "policy": {
-    "runner_kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
-    "installation_kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
+    "runner_kit_sha256": "16d709dae20a9bd50d013a8c619ebe454cf043bf4e02d47ffd837e7b653f2dca",
+    "installation_kit_sha256": "16d709dae20a9bd50d013a8c619ebe454cf043bf4e02d47ffd837e7b653f2dca",
     "reference_source": "attachment.json at installation; locally editable, not an independent trust anchor",
     "full_required_checks": [
       "acceptance",

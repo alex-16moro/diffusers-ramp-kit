@@ -1,9 +1,9 @@
 {
   "status": "PASS",
   "kind": "CLI fixture rehearsal and LOCAL CI simulation, not Cursor or remote fork CI",
-  "base_commit": "1903c4f1a5472341caaa461f280ccce59b4a7939",
-  "candidate_commit": "5329a6857f2f9f9c03ea385b4f84b1f7df34fa9e",
-  "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
+  "base_commit": "8eb875358bc07f7156aa2ca96b1b9a9738dcda06",
+  "candidate_commit": "09ef9493730a2bcb28898ade36a338c716a7fa7b",
+  "kit_sha256": "16d709dae20a9bd50d013a8c619ebe454cf043bf4e02d47ffd837e7b653f2dca",
   "normal_commit_clone_doctor": "PASS",
   "cold_bootstrap": "PASS",
   "local_checks": 12,

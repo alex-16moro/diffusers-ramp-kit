@@ -1,10 +1,10 @@
 {
   "status": "EXPECTED_FAILURE",
-  "run_id": "20260923T113052310000Z",
+  "run_id": "20261003T080332524119Z",
   "intended_failure_observed": true,
   "origin": "Disposable original-implementation replay during full verification",
   "base_sha": "0121a91f9d419ff7234c8a5923f82c244e6f1914",
-  "kit_sha256": "f3e7d284016b7946c8b5f48d2b7f019110efafca682ef578863f28644adbba8d",
+  "kit_sha256": "16d709dae20a9bd50d013a8c619ebe454cf043bf4e02d47ffd837e7b653f2dca",
   "test_sha256": "6dd01ea361d93c6af83dff24966186f6c6a2c3757e6548927a6da73f9e2fd138",
   "task_sha256": "654bb9fee8292411edd697f401ec024eb476e9ead6a67ab00c6dbb0818afb746",
   "checks": [
@@ -12,19 +12,19 @@
       "id": "test-strength",
       "status": "PASS",
       "command": [
-        "/workspace/scratch/306c018f6a72/rereview-integration/.ramp-venv/bin/python",
+        "/home/runner/work/_temp/rehearsal/.ramp-venv/bin/python",
         "-m",
         "pytest",
         "-q",
         "-o",
         "addopts=",
         "--junitxml",
-        "/tmp/ramp-strength-ohclelkj/checkout/.ramp-replay/regression.xml",
+        "/tmp/ramp-strength-qp0ejwkn/checkout/.ramp-replay/regression.xml",
         "tests/schedulers/test_scheduler_ddpm.py::DDPMSchedulerTest::test_empty_custom_timesteps"
       ],
       "exit_code": 1,
-      "seconds": 4.672,
-      "log": ".ramp/empty-timesteps/runs/20260923T113052310000Z/test-strength.log",
+      "seconds": 5.368,
+      "log": ".ramp/empty-timesteps/runs/20261003T080332524119Z/test-strength.log",
       "tests": [
         {
           "name": "test_empty_custom_timesteps",
