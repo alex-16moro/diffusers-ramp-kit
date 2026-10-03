@@ -16,6 +16,8 @@
 .ai/skills/model-integration/SKILL.md
 .ai/skills/self-review/SKILL.md
 .claude-plugin/marketplace.json
+.cursor/environment.json
+.cursor/ramp-cloud-setup.sh
 .cursor/rules/ramp-entry.mdc
 .cursor/rules/ramp-scheduler.mdc
 .cursorignore
@@ -81,9 +83,12 @@
 .ramp-kit/recipes/scheduler-input-validation.md
 .ramp-kit/run.py
 .ramp-kit/runtime/bootstrap.sh
+.ramp-kit/runtime/ci_provenance.py
 .ramp-kit/runtime/requirements.txt
+.ramp-kit/templates/cursor-environment.json
 .ramp-kit/templates/cursorignore.txt
 .ramp-kit/templates/fork-ci.yml
+.ramp-kit/templates/ramp-cloud-setup.sh
 AGENTS.md
 CITATION.cff
 CLAUDE.md
