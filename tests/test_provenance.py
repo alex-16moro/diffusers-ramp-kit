@@ -121,6 +121,8 @@ class ProvenanceTests(unittest.TestCase):
         record = self.run_script()
         self.assertEqual(record["tasks"], [])
         self.assertEqual(record["tested_checkout_sha"], self.merge)
+        # Absent task evidence must never read as consistent task evidence.
+        self.assertFalse(record["consistency"]["task_patches_use_upstream_pin"])
 
     def test_workflow_runs_recorder_from_policy_after_verification(self):
         workflow = (KIT / "templates/fork-ci.yml").read_text()

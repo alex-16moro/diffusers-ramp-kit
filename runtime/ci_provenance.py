@@ -84,7 +84,9 @@ def provenance(policy: Path, candidate: Path, env: dict) -> dict:
             "policy_checkout_is_pr_base": policy_sha == pr_base,
             "tested_checkout_contains_pr_head": tested == pr_head or pr_head in parents,
             "tested_checkout_contains_pr_base": tested == pr_base or pr_base in parents,
-            "task_patches_use_upstream_pin": all(t["patch_base_sha"] == upstream_pin for t in tasks),
+            # Fails closed: no task record is missing evidence, not consistent evidence.
+            "task_patches_use_upstream_pin": bool(tasks)
+            and all(t["patch_base_sha"] == upstream_pin for t in tasks),
         },
         "comparison_contract": (
             "Patch digests are computed against upstream_pin, so a local and a CI digest are comparable "
