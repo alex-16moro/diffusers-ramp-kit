@@ -309,7 +309,10 @@ def validate_assessment(repo: Path, task: dict, record: dict):
     ):
         raise RampError("Architecture assessment requires a substantive rationale and source references.")
     for reference in sources:
-        context(repo, reference)
+        try:
+            context(repo, reference)
+        except (OSError, UnicodeError) as exc:
+            raise RampError(f"Cannot read assessment source {reference}: {exc}") from exc
     alternative = record.get("alternative", "")
     if not isinstance(alternative, str) or (record["decision"] != "COMPATIBLE" and not alternative.strip()):
         raise RampError("Pushback must include an alternative or the maintainer decision needed.")
@@ -786,6 +789,12 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
     review = load(directory / "architecture.json") if (directory / "architecture.json").exists() else {}
     findings = scope_findings(repo, task) + diagnostic(repo, task) + assertion_findings(repo, task)
     try:
+        if not (directory / "architecture.json").exists():
+            raise RampError(
+                f"No architecture assessment recorded for {task_id}; run assess {task_id} "
+                "--decision COMPATIBLE --rationale <source-grounded-rationale> --source <approved-path> "
+                "before verifying. Assess the proposal before choosing a decision."
+            )
         validate_assessment(repo, task, review)
         if review["decision"] != "COMPATIBLE":
             raise RampError("Current task needs a compatible architecture assessment.")
@@ -923,7 +932,7 @@ def readiness(repo: Path, task: dict) -> dict:
     candidate = load(directory / "candidate.json") if (directory / "candidate.json").exists() else None
     baseline = load(directory / "baseline.json") if (directory / "baseline.json").exists() else None
     replay = load(directory / "replay.json") if (directory / "replay.json").exists() else None
-    if candidate is None:
+    if not (directory / "candidate.json").exists():
         return {
             "status": "NOT_RUN",
             "reason": "Run verification.",
@@ -931,12 +940,23 @@ def readiness(repo: Path, task: dict) -> dict:
             "baseline": baseline,
             "replay": replay,
         }
-    if candidate["fingerprint"] != fingerprint(repo, task):
+    if (
+        not isinstance(candidate, dict)
+        or not isinstance(candidate.get("fingerprint"), str)
+        or candidate.get("status") not in ("PASS", "FAIL", "ERROR", "INCOMPLETE")
+    ):
+        status, reason = (
+            "INCOMPLETE",
+            "Malformed candidate record: expected fingerprint and status; rerun verify.",
+        )
+    elif candidate["fingerprint"] != fingerprint(repo, task):
         status, reason = "STALE", "Code, policy, requirements or assessment changed; rerun verification."
+    elif candidate.get("level") not in ("fast", "full"):
+        status, reason = "INCOMPLETE", "Malformed candidate level; rerun verify."
     elif candidate["status"] != "PASS":
         status, reason = candidate["status"], "Resolve failed, skipped or unavailable checks."
     elif not any(
-        e
+        isinstance(e, dict)
         and e.get("status") == "EXPECTED_FAILURE"
         and e.get("task_sha256") == digest(canonical(task))
         and e.get("test_sha256") == digest(safe_path(repo, profile()["test_file"]).read_bytes())
@@ -948,11 +968,8 @@ def readiness(repo: Path, task: dict) -> dict:
         )
     elif candidate["level"] != "full":
         status, reason = "FAST_CHECKS_PASSED", "Run full verification before calling the PR clean."
-    elif not complete_successful_checks(candidate):
-        status, reason = (
-            "INCOMPLETE",
-            "Each required check must occur exactly once and pass; counts must agree.",
-        )
+    elif failure := successful_checks_failure(candidate):
+        status, reason = "INCOMPLETE", failure
     else:
         status, reason = (
             "READY_FOR_HUMAN_REVIEW",
@@ -967,25 +984,39 @@ def readiness(repo: Path, task: dict) -> dict:
     }
 
 
-def complete_successful_checks(candidate: dict) -> bool:
+def successful_checks_failure(candidate: dict) -> str | None:
+    """Name the evidence that needs repair; a valid full success returns no failure."""
     checks = candidate.get("checks")
     if not isinstance(checks, list) or any(not isinstance(check, dict) for check in checks):
-        return False
+        return "Malformed checks: expected a list of check records; rerun full verification."
     ids = [check.get("id") for check in checks]
     if any(not isinstance(check_id, str) for check_id in ids):
-        return False
-    if len(ids) != len(set(ids)) or set(ids) != set(required_checks()):
-        return False
-    if any(check.get("status") != "PASS" for check in checks):
-        return False
-    if "required_checks" in candidate and candidate["required_checks"] != required_checks():
-        return False
-    if "counts" in candidate:
-        expected = {
-            state: len(checks) if state == "PASS" else 0
-            for state in ("PASS", "FAIL", "ERROR", "SKIPPED", "NOT_RUN")
-        }
-        expected["checks"] = len(checks)
-        if candidate["counts"] != expected:
-            return False
-    return True
+        return "Malformed check IDs: each check needs a string ID; rerun full verification."
+    duplicates = sorted({check_id for check_id in ids if ids.count(check_id) > 1})
+    if duplicates:
+        return "Duplicate check IDs: " + ", ".join(duplicates) + "; rerun full verification."
+    required = required_checks()
+    missing, unexpected = sorted(set(required) - set(ids)), sorted(set(ids) - set(required))
+    if missing:
+        return "Missing required checks: " + ", ".join(missing) + "; run full verification."
+    if unexpected:
+        return "Unexpected check IDs: " + ", ".join(unexpected) + "; rerun full verification."
+    failed = [
+        f"{check['id']}={check.get('status', 'MISSING')}" for check in checks if check.get("status") != "PASS"
+    ]
+    if failed:
+        return "Required checks did not pass: " + ", ".join(failed) + "; inspect their logs and rerun."
+    if "required_checks" not in candidate:
+        return "Missing required_checks in candidate record; rerun full verification."
+    if candidate["required_checks"] != required:
+        return "required_checks mismatch with current policy; rerun full verification."
+    if "counts" not in candidate:
+        return "Missing counts in candidate record; rerun full verification."
+    expected = {
+        state: len(checks) if state == "PASS" else 0
+        for state in ("PASS", "FAIL", "ERROR", "SKIPPED", "NOT_RUN")
+    }
+    expected["checks"] = len(checks)
+    if candidate["counts"] != expected:
+        return "counts mismatch with executed check results; rerun full verification."
+    return None
