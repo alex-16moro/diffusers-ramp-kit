@@ -14,7 +14,7 @@ The platform owner prepares and publishes the reviewed `ramp-base` branch on the
 
 The engineer host must never contain this kit repository or its completed fixtures, `deliverables/` or `historical/` records. A neighbouring folder is still accessible to an agent; workspace instructions alone are insufficient. Keep the source history required for the pinned upstream baseline, but do not fetch contribution branches or solution-bearing history. Record the installation SHA and host/workspace preflight before acceptance.
 
-The attachment appends narrowly scoped `.gitignore` exceptions so plain `git add -A` includes the rules. It adds `.ramp-kit/`, two Cursor rules, `.cursorignore` and an additive fork CI workflow, preserving upstream instructions and workflows. Its context, scope and integrity checks are not whole-agent filesystem/network isolation.
+The attachment appends narrowly scoped `.gitignore` exceptions so plain `git add -A` includes the rules. It adds `.ramp-kit/`, two Cursor rules, Cursor cloud setup (`.cursor/environment.json`, which runs `.cursor/ramp-cloud-setup.sh` to bootstrap `.ramp-venv` and run `doctor`), `.cursorignore` and an additive fork CI workflow, preserving upstream instructions and workflows. Its context, scope and integrity checks are not whole-agent filesystem/network isolation.
 
 ## Workflow and reset
 
