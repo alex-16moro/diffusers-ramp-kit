@@ -34,7 +34,7 @@ jobs:
           rows=[]
           for ref in refs:
               diff=subprocess.check_output(["git","diff",pin,ref,"--",*files],text=True)
-              matches=[m.group(0) for m in pattern.finditer(diff)]
+              matches=[line for line in diff.splitlines() if pattern.search(line)]
               sha=subprocess.check_output(["git","rev-parse",ref],text=True).strip()
               rows.append({"ref":ref,"sha":sha,"hits":matches})
               if matches: hits.append({"ref":ref,"lines":matches})
