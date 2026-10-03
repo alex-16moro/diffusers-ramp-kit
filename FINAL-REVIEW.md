@@ -58,5 +58,5 @@ Coordination for the next round is in alex-16moro/diffusers-ramp-kit#4. Kit chan
 3. Complete clean Cursor acceptance.
 4. Only then add a second recipe.
 
-Packaged evidence and `CONTENTS.sha256` are regenerated once, against the agreed final revision, after integration review. Until then the kit repository's `unit` job reports manifest mismatches on changed files, and these are disclosed in each PR.
+Packaged evidence and `CONTENTS.sha256` are regenerated once, against the agreed final revision, after integration review. Until then the kit repository's separate `manifest` CI job reports mismatches on changed files, and each PR discloses them. The `unit` job runs only the tests. Final acceptance requires `unit`, `manifest` and `integration` all green on the final revision, after the regeneration.
 
