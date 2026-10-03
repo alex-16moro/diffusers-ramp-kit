@@ -67,6 +67,14 @@ class InstallationTests(unittest.TestCase):
             subprocess.run(["git", "clone", "-q", str(self.repo), str(clone)], check=True)
             self.assertEqual(core.doctor(clone, dependencies=False)["status"], "PASS")
 
+    def test_evaluator_protocol_is_never_installed(self):
+        attach(self.repo)
+        acceptance = (KIT / "ACCEPTANCE.md").read_bytes()
+        installed = core.attachment(self.repo)["files"]
+        self.assertFalse(any(Path(relative).name == "ACCEPTANCE.md" for relative in installed))
+        for relative in installed:
+            self.assertNotEqual((self.repo / relative).read_bytes(), acceptance, relative)
+
     def test_publication_target_is_recorded_and_protected(self):
         result = main(
             [
