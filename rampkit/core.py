@@ -292,16 +292,33 @@ def prepare(repo: Path, spec: Path) -> dict:
     }
 
 
+def validate_assessment(repo: Path, task: dict, record: dict):
+    if not isinstance(record, dict):
+        raise RampError("Architecture assessment must be an object.")
+    if record.get("decision") not in {"COMPATIBLE", "REVISE", "NEEDS_MAINTAINER"}:
+        raise RampError("Architecture assessment needs a supported decision.")
+    if record.get("task_sha256") != digest(canonical(task)):
+        raise RampError("Architecture assessment does not match the current task.")
+    rationale, sources = record.get("rationale"), record.get("sources")
+    if (
+        not isinstance(rationale, str)
+        or len(rationale.strip()) < 30
+        or not isinstance(sources, list)
+        or not sources
+        or any(not isinstance(source, str) or not source.strip() for source in sources)
+    ):
+        raise RampError("Architecture assessment requires a substantive rationale and source references.")
+    for reference in sources:
+        context(repo, reference)
+    alternative = record.get("alternative", "")
+    if not isinstance(alternative, str) or (record["decision"] != "COMPATIBLE" and not alternative.strip()):
+        raise RampError("Pushback must include an alternative or the maintainer decision needed.")
+
+
 def assess(
     repo: Path, task_id: str, decision: str, rationale: str, sources: list[str], alternative: str
 ) -> dict:
     task = read_task(repo, task_id)
-    if len(rationale.strip()) < 30 or not sources:
-        raise RampError("Architecture assessment requires a substantive rationale and source references.")
-    for reference in sources:
-        context(repo, reference)
-    if decision != "COMPATIBLE" and not alternative.strip():
-        raise RampError("Pushback must include an alternative or the maintainer decision needed.")
     record = {
         "decision": decision,
         "rationale": rationale,
@@ -310,6 +327,7 @@ def assess(
         "task_sha256": digest(canonical(task)),
         "kind": "agent_assessment_not_human_approval",
     }
+    validate_assessment(repo, task, record)
     directory = task_dir(repo, task_id)
     history = (
         load(directory / "architecture-history.json")
@@ -767,10 +785,12 @@ def verify(repo: Path, task_id: str, level: str, phase: str) -> dict:
         raise RampError("; ".join(preflight["findings"]))
     review = load(directory / "architecture.json") if (directory / "architecture.json").exists() else {}
     findings = scope_findings(repo, task) + diagnostic(repo, task) + assertion_findings(repo, task)
-    if review.get("decision") != "COMPATIBLE" or review.get("task_sha256") != digest(canonical(task)):
-        findings.append(
-            {"rule": "DESIGN", "message": "Current task needs a compatible, cited architecture assessment."}
-        )
+    try:
+        validate_assessment(repo, task, review)
+        if review["decision"] != "COMPATIBLE":
+            raise RampError("Current task needs a compatible architecture assessment.")
+    except RampError as exc:
+        findings.append({"rule": "DESIGN", "message": str(exc)})
     before = fingerprint(repo, task)
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     logs = directory / "runs" / run_id
@@ -928,10 +948,11 @@ def readiness(repo: Path, task: dict) -> dict:
         )
     elif candidate["level"] != "full":
         status, reason = "FAST_CHECKS_PASSED", "Run full verification before calling the PR clean."
-    elif not any(c["id"] == "test-strength" and c["status"] == "PASS" for c in candidate.get("checks", [])):
-        status, reason = "INCOMPLETE", "Full verification must include the disposable fix-removal replay."
-    elif set(required_checks()) != {c["id"] for c in candidate.get("checks", [])}:
-        status, reason = "INCOMPLETE", "Executed checks do not match the required profile checks."
+    elif not complete_successful_checks(candidate):
+        status, reason = (
+            "INCOMPLETE",
+            "Each required check must occur exactly once and pass; counts must agree.",
+        )
     else:
         status, reason = (
             "READY_FOR_HUMAN_REVIEW",
@@ -944,3 +965,27 @@ def readiness(repo: Path, task: dict) -> dict:
         "baseline": baseline,
         "replay": replay,
     }
+
+
+def complete_successful_checks(candidate: dict) -> bool:
+    checks = candidate.get("checks")
+    if not isinstance(checks, list) or any(not isinstance(check, dict) for check in checks):
+        return False
+    ids = [check.get("id") for check in checks]
+    if any(not isinstance(check_id, str) for check_id in ids):
+        return False
+    if len(ids) != len(set(ids)) or set(ids) != set(required_checks()):
+        return False
+    if any(check.get("status") != "PASS" for check in checks):
+        return False
+    if "required_checks" in candidate and candidate["required_checks"] != required_checks():
+        return False
+    if "counts" in candidate:
+        expected = {
+            state: len(checks) if state == "PASS" else 0
+            for state in ("PASS", "FAIL", "ERROR", "SKIPPED", "NOT_RUN")
+        }
+        expected["checks"] = len(checks)
+        if candidate["counts"] != expected:
+            return False
+    return True
