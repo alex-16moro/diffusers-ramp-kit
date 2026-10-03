@@ -87,6 +87,11 @@ class InstallationTests(unittest.TestCase):
         (self.repo / ".ramp-kit/publication.json").write_text('{"repository": "huggingface/diffusers"}\n')
         self.assertEqual(core.doctor(self.repo, dependencies=False)["status"], "ERROR")
 
+    def test_nested_publication_branch_is_accepted(self):
+        attach(self.repo, "example-owner/diffusers", "team/ramp-demo")
+        record = json.loads((self.repo / ".ramp-kit/publication.json").read_text())
+        self.assertEqual(record["base_branch"], "team/ramp-demo")
+
     def test_publication_target_without_flags_is_absent(self):
         attach(self.repo)
         self.assertFalse((self.repo / ".ramp-kit/publication.json").exists())
@@ -99,6 +104,15 @@ class InstallationTests(unittest.TestCase):
             ("HuggingFace/Diffusers", "main", "not the upstream project"),
             ("not a repository", "ramp-demo", "OWNER/NAME"),
             ("example-owner/diffusers", "bad..branch", "valid branch name"),
+            # Each of these is rejected by `git check-ref-format --branch`.
+            ("example-owner/diffusers", ".", "valid branch name"),
+            ("example-owner/diffusers", "/ramp-demo", "valid branch name"),
+            ("example-owner/diffusers", "ramp-demo/", "valid branch name"),
+            ("example-owner/diffusers", "foo.lock", "valid branch name"),
+            ("example-owner/diffusers", "-ramp-demo", "valid branch name"),
+            ("example-owner/diffusers", "@{-1}", "valid branch name"),
+            ("example-owner/diffusers", "HEAD", "valid branch name"),
+            ("example-owner/diffusers", "ramp demo", "valid branch name"),
         ):
             with self.subTest(repository=repository, base=base):
                 with self.assertRaisesRegex(core.RampError, message):

@@ -53,6 +53,18 @@ def onboard(
     }
 
 
+def valid_branch_name(name: str) -> bool:
+    """Git's own branch-name rules, checked before anything is written.
+
+    `refs/heads/<name>` is checked rather than `--branch <name>`, which would expand
+    `@{-N}` against whatever repository the command runs in.
+    """
+    if name.startswith("-") or name == "HEAD":
+        return False
+    result = subprocess.run(["git", "check-ref-format", f"refs/heads/{name}"], capture_output=True, text=True)
+    return result.returncode == 0
+
+
 def publication_target(repository: str | None, base_branch: str | None) -> dict | None:
     """Validate the owner-named fork target that the entry rule allows publishing to."""
     if repository is None and base_branch is None:
@@ -61,7 +73,7 @@ def publication_target(repository: str | None, base_branch: str | None) -> dict 
         raise core.RampError("Name both --publish-repo OWNER/NAME and --publish-base BRANCH, or neither.")
     if not re.fullmatch(r"[A-Za-z0-9-]+/[A-Za-z0-9._-]+", repository):
         raise core.RampError(f"Publication repository must look like OWNER/NAME: {repository}")
-    if not re.fullmatch(r"[A-Za-z0-9._/-]+", base_branch) or ".." in base_branch:
+    if not valid_branch_name(base_branch):
         raise core.RampError(f"Publication base branch is not a valid branch name: {base_branch}")
     upstream = re.sub(r"(\.git)?/?$", "", str(core.profile().get("upstream", ""))).lower()
     if upstream.endswith("/" + repository.lower()):
