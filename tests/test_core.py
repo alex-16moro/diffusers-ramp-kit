@@ -58,7 +58,13 @@ class WorkflowTests(unittest.TestCase):
         core.write(self.directory / "task.json", self.task)
         core.write(
             self.directory / "architecture.json",
-            {"decision": "COMPATIBLE", "task_sha256": core.digest(core.canonical(self.task))},
+            {
+                "decision": "COMPATIBLE",
+                "task_sha256": core.digest(core.canonical(self.task)),
+                "rationale": "Keep validation in the owning scheduler API with regression coverage.",
+                "sources": [self.source],
+                "alternative": "",
+            },
         )
 
     def git(self, *args):
@@ -123,6 +129,81 @@ class WorkflowTests(unittest.TestCase):
     def test_old_green_report_is_stale(self):
         core.write(self.directory / "candidate.json", {"fingerprint": "old", "status": "PASS"})
         self.assertEqual(core.readiness(self.repo, self.task)["status"], "STALE")
+
+    def test_incomplete_compatible_assessment_stops_execution(self):
+        core.write(
+            self.directory / "architecture.json",
+            {"decision": "COMPATIBLE", "task_sha256": core.digest(core.canonical(self.task))},
+        )
+        (self.repo / self.tests).write_text(
+            "class Tests:\n    def test_empty(self):\n        assert actual == 1\n"
+        )
+        with (
+            patch.object(core, "doctor", return_value={"status": "PASS", "runtime": {}}),
+            patch.object(core, "pytest_check", return_value={"id": "acceptance", "status": "PASS"}) as run,
+            patch.object(core, "run_check", return_value={"id": "lint", "status": "PASS"}),
+        ):
+            result = core.verify(self.repo, "task", "fast", "candidate")
+        self.assertEqual(result["status"], "FAIL")
+        run.assert_not_called()
+        self.assertTrue(any(f["rule"] == "DESIGN" for f in result["findings"]))
+
+    def test_inconsistent_success_record_is_not_ready(self):
+        checks = [{"id": name, "status": "PASS"} for name in core.required_checks()]
+        candidate = {
+            "fingerprint": core.fingerprint(self.repo, self.task),
+            "status": "PASS",
+            "level": "full",
+            "checks": checks,
+        }
+        core.write(
+            self.directory / "baseline.json",
+            {
+                "status": "EXPECTED_FAILURE",
+                "task_sha256": core.digest(core.canonical(self.task)),
+                "test_sha256": core.digest((self.repo / self.tests).read_bytes()),
+            },
+        )
+        core.write(self.directory / "candidate.json", candidate)
+        self.assertEqual(core.readiness(self.repo, self.task)["status"], "READY_FOR_HUMAN_REVIEW")
+        for state in ("FAIL", "ERROR", "SKIPPED", "NOT_RUN"):
+            with self.subTest(state=state):
+                invalid = copy.deepcopy(candidate)
+                invalid["checks"][0]["status"] = state
+                core.write(self.directory / "candidate.json", invalid)
+                self.assertEqual(core.readiness(self.repo, self.task)["status"], "INCOMPLETE")
+        duplicate = copy.deepcopy(candidate)
+        duplicate["checks"].append(checks[0])
+        core.write(self.directory / "candidate.json", duplicate)
+        self.assertEqual(core.readiness(self.repo, self.task)["status"], "INCOMPLETE")
+        for field, value in (
+            ("checks", [None]),
+            ("checks", [{"id": None, "status": "PASS"}]),
+            ("counts", {"checks": 999, "PASS": 999}),
+            ("required_checks", ["invented-check"]),
+        ):
+            with self.subTest(field=field, value=value):
+                invalid = copy.deepcopy(candidate)
+                invalid[field] = value
+                core.write(self.directory / "candidate.json", invalid)
+                self.assertEqual(core.readiness(self.repo, self.task)["status"], "INCOMPLETE")
+
+    def test_assessment_consumption_validates_citations(self):
+        valid = core.load(self.directory / "architecture.json")
+        for field, value in (
+            ("sources", ["missing.py"]),
+            ("sources", self.source),
+            ("sources", [None]),
+            ("rationale", "short"),
+            ("decision", "invented"),
+            ("task_sha256", "old"),
+        ):
+            with self.subTest(field=field, value=value):
+                invalid = copy.deepcopy(valid)
+                invalid[field] = value
+                with self.assertRaises(core.RampError):
+                    core.validate_assessment(self.repo, self.task, invalid)
+        core.validate_assessment(self.repo, self.task, valid)
 
     def test_source_drift_reported(self):
         self.profile["sources"][self.source] = "wrong"
