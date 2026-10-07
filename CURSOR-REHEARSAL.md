@@ -22,6 +22,7 @@ Status: NOT_RUN. Complete from a fresh Cursor session on the reviewed evaluation
 - Only prepared checkout in context; no prior task records or solution:
 - Web/MCP/external retrieval disabled:
 - Exact request: the fresh task agreed in alex-16moro/diffusers-ramp-kit#4. The empty-list `[999]` request is retired for clean acceptance because the installed kit contains its worked example (`examples/empty-timesteps.json`, the recipe example and scheduler-rule wording).
+- Recipe selected, eligibility rationale, related files and any scope expansion:
 - Source file/line/symbol citations and pushback:
 - Agent-written spec from request/source (not a copied example), and generated scaffold preserving existing tests:
 - Pre-implementation regression and separately recorded replay:

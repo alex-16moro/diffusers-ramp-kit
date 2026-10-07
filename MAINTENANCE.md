@@ -13,6 +13,14 @@ Ownership: upstream owns its source and conventions; the platform owner owns the
 
 Upstream `AGENTS.md` is a symlink to `.ai/AGENTS.md` at this pin. Preserve it. The approved context helper uses `.ai/AGENTS.md` directly and continues to reject symlinks in requested paths.
 
+## Maintaining reusable recipes
+
+Keep `recipes/README.md` aligned with executable support. A recipe describes a contribution type; examples demonstrate individual tasks. Keep task-specific expected answers out of general routing rules. Do not add empty recipes for contribution types the verifier cannot support.
+
+When review repeatedly identifies a mistake, choose the narrowest durable fix: an existing upstream check, a meaningful regression test, structural code improvement, or recipe guidance for a judgement call. A prose reminder is not an executable gate. Review upstream changes separately; do not refactor the library merely to simplify the kit.
+
+If a request exceeds a recipe's boundary, the contribution agent reports the gap. The platform owner reviews any extension to context, editable paths, test mapping and verification contracts. Validate the new route before advertising it as supported. A Markdown edit alone does not prove reuse.
+
 ## A second similar task — NOT_RUN
 
 Requirement 4 remains PARTIAL: the profile/scaffold mechanics are tested, but this second-task CLI path has not been demonstrated.
